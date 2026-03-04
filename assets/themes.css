@@ -1,0 +1,689 @@
+/* ========================================
+   🎨 SISTEMA DE TEMAS - DARK & LIGHT MODE
+   ======================================== */
+
+:root {
+  /* 🌙 DARK MODE COLORS */
+  --dark-bg-primary: #0f0f23;
+  --dark-bg-secondary: #1a1a2e;
+  --dark-bg-tertiary: #16213e;
+  --dark-bg-card: rgba(26, 26, 46, 0.85);
+  --dark-text-primary: #ffffff;
+  --dark-text-secondary: #e0e0e0;
+  --dark-text-muted: #a0a0b0;
+  --dark-border: rgba(255, 255, 255, 0.1);
+  --dark-shadow: rgba(0, 0, 0, 0.5);
+
+  /* ☀️ LIGHT MODE COLORS */
+  --light-bg-primary: #f8f9fa;
+  --light-bg-secondary: #ffffff;
+  --light-bg-tertiary: #f1f3f5;
+  --light-bg-card: rgba(255, 255, 255, 0.95);
+  --light-text-primary: #1a202c;
+  --light-text-secondary: #2d3748;
+  --light-text-muted: #718096;
+  --light-border: rgba(0, 0, 0, 0.08);
+  --light-shadow: rgba(0, 0, 0, 0.1);
+
+  /* 🎨 ACCENT COLORS (compartilhados) */
+  --accent-primary: #6366f1;
+  --accent-secondary: #8b5cf6;
+  --accent-success: #10b981;
+  --accent-warning: #f59e0b;
+  --accent-danger: #ef4444;
+  --accent-info: #3b82f6;
+
+  /* 🎨 WHATSAPP COLORS */
+  --whatsapp-green: #00a884;
+  --whatsapp-green-dark: #008f6f;
+  --whatsapp-teal: #25d366;
+}
+
+/* ========================================
+   ☀️ LIGHT MODE (Padrão)
+   ======================================== */
+
+body {
+  background: linear-gradient(135deg, #e0e7ff 0%, #ddd6fe 50%, #fae8ff 100%);
+  background-attachment: fixed;
+  color: var(--light-text-primary);
+  transition: background 0.5s ease, color 0.3s ease;
+  position: relative;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(167, 139, 250, 0.15), transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(196, 181, 253, 0.12), transparent 50%),
+    radial-gradient(circle at 40% 80%, rgba(224, 231, 255, 0.18), transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+  animation: gradientShift 15s ease infinite;
+}
+
+@keyframes gradientShift {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.8;
+  }
+}
+
+/* Container principal */
+.main-container {
+  position: relative;
+  z-index: 1;
+}
+
+/* Cards em Light Mode */
+.card {
+  background: var(--light-bg-card);
+  backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--light-border);
+  box-shadow:
+    0 20px 40px var(--light-shadow),
+    0 0 80px rgba(139, 92, 246, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  box-shadow:
+    0 25px 50px rgba(0, 0, 0, 0.15),
+    0 0 100px rgba(139, 92, 246, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  transform: translateY(-2px);
+}
+
+/* Header em Light Mode */
+header {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(15px);
+  border-bottom: 1px solid var(--light-border);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+/* Sidebar em Light Mode permanece escura */
+.sidebar {
+  background: linear-gradient(180deg, #111827 0%, #030712 100%);
+  border-right: 1px solid #1f2937;
+  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
+}
+
+/* ========================================
+   🌙 DARK MODE
+   ======================================== */
+
+body.dark-mode {
+  background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+  background-attachment: fixed;
+  color: var(--dark-text-primary);
+}
+
+body.dark-mode::before {
+  background:
+    radial-gradient(circle at 20% 50%, rgba(99, 102, 241, 0.15), transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.12), transparent 50%),
+    radial-gradient(circle at 40% 20%, rgba(59, 130, 246, 0.1), transparent 50%);
+}
+
+/* Cards em Dark Mode */
+body.dark-mode .card {
+  background: var(--dark-bg-card);
+  backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--dark-border);
+  box-shadow:
+    0 20px 40px var(--dark-shadow),
+    0 0 80px rgba(99, 102, 241, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+body.dark-mode .card:hover {
+  box-shadow:
+    0 25px 50px rgba(0, 0, 0, 0.7),
+    0 0 100px rgba(99, 102, 241, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+  border-color: rgba(99, 102, 241, 0.3);
+}
+
+/* Header em Dark Mode */
+body.dark-mode header {
+  background: rgba(26, 26, 46, 0.95) !important;
+  backdrop-filter: blur(15px);
+  border-bottom: 1px solid var(--dark-border);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-mode header h2,
+body.dark-mode header .text-gray-900 {
+  color: var(--dark-text-primary) !important;
+}
+
+/* Sidebar em Dark Mode com degradê especial */
+body.dark-mode .sidebar {
+  background: linear-gradient(180deg, #0a0a1a 0%, #16213e 50%, #1a1a2e 100%);
+  border-right: 1px solid rgba(99, 102, 241, 0.2);
+  box-shadow: 4px 0 30px rgba(99, 102, 241, 0.15);
+}
+
+/* Textos em Light Mode */
+.text-gray-400 {
+  color: var(--light-text-muted) !important;
+}
+
+/* Textos em Dark Mode */
+body.dark-mode .text-gray-900 {
+  color: var(--dark-text-primary) !important;
+}
+
+body.dark-mode .text-gray-700 {
+  color: var(--dark-text-secondary) !important;
+}
+
+body.dark-mode .text-gray-600,
+body.dark-mode .text-gray-500 {
+  color: var(--dark-text-muted) !important;
+}
+
+body.dark-mode .text-gray-400 {
+  color: var(--dark-text-muted) !important;
+}
+
+/* Texto branco precisa ser escuro no Light Mode, EXCETO na sidebar */
+body:not(.dark-mode) .text-white:not(.sidebar *):not(.sidebar) {
+  color: var(--light-text-primary) !important;
+}
+
+/* No Dark Mode, texto branco fora da sidebar também é branco */
+body.dark-mode .text-white {
+  color: #ffffff !important;
+}
+
+/* Garante que textos na sidebar sempre sejam claros */
+.sidebar .text-white,
+.sidebar #sidebar-main-title {
+  color: #ffffff !important;
+}
+
+/* Inputs em Dark Mode */
+body.dark-mode input,
+body.dark-mode textarea,
+body.dark-mode select {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--dark-border);
+  color: var(--dark-text-primary);
+}
+
+body.dark-mode input::placeholder {
+  color: var(--dark-text-muted);
+}
+
+body.dark-mode input:focus,
+body.dark-mode textarea:focus,
+body.dark-mode select:focus {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+}
+
+/* Tabelas em Dark Mode */
+body.dark-mode table {
+  color: var(--dark-text-primary);
+}
+
+body.dark-mode thead {
+  background: rgba(99, 102, 241, 0.1) !important;
+}
+
+body.dark-mode tbody tr {
+  border-color: var(--dark-border);
+  background: transparent;
+}
+
+body.dark-mode tbody tr:hover {
+  background: rgba(99, 102, 241, 0.08) !important;
+}
+
+body.dark-mode th {
+  color: var(--dark-text-secondary) !important;
+  border-color: var(--dark-border);
+}
+
+body.dark-mode td {
+  color: var(--dark-text-secondary) !important;
+  border-color: var(--dark-border);
+}
+
+/* Modals em Dark Mode */
+body.dark-mode .modal-backdrop {
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
+body.dark-mode #edit-lead-modal>div:last-child {
+  background: var(--dark-bg-secondary);
+  border: 1px solid var(--dark-border);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8);
+}
+
+body.dark-mode #edit-lead-modal h3,
+body.dark-mode #edit-lead-modal label {
+  color: var(--dark-text-primary) !important;
+}
+
+/* Botões em Dark Mode */
+body.dark-mode .bg-white {
+  background: rgba(255, 255, 255, 0.05) !important;
+  color: var(--dark-text-primary) !important;
+  border-color: var(--dark-border) !important;
+}
+
+body.dark-mode .bg-white:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+body.dark-mode .border-gray-300 {
+  border-color: var(--dark-border) !important;
+}
+
+body.dark-mode .bg-gray-50 {
+  background: rgba(255, 255, 255, 0.03) !important;
+}
+
+body.dark-mode .bg-gray-100 {
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* ========================================
+   📱 WHATSAPP - LIGHT MODE
+   ======================================== */
+
+.whatsapp-container {
+  background: transparent !important;
+}
+
+/* Painel de Leads - Light Mode */
+.leads-panel {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(20px);
+  border-right: 1px solid rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 2px 0 20px rgba(0, 0, 0, 0.05);
+}
+
+.leads-header {
+  background: linear-gradient(135deg, #e0e7ff 0%, #ddd6fe 100%) !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+}
+
+.search-container {
+  background: rgba(255, 255, 255, 0.8) !important;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.search-container input {
+  color: var(--light-text-primary) !important;
+}
+
+.lead-item {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
+}
+
+.lead-item:hover,
+.lead-item.active {
+  background: rgba(139, 92, 246, 0.08) !important;
+}
+
+.lead-nome {
+  color: var(--light-text-primary) !important;
+}
+
+.lead-ultima-mensagem,
+.msg-preview,
+.lead-horario {
+  color: var(--light-text-muted) !important;
+}
+
+/* Chat Panel - Light Mode */
+.chat-panel {
+  background: linear-gradient(135deg, #f3e8ff 0%, #fae8ff 100%) !important;
+}
+
+.chat-header {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(15px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.chat-header h3 {
+  color: var(--light-text-primary) !important;
+}
+
+.chat-messages {
+  background: linear-gradient(135deg, #f3e8ff 0%, #fae8ff 100%) !important;
+}
+
+.chat-input {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(15px);
+  border-top: 1px solid rgba(0, 0, 0, 0.08) !important;
+}
+
+.chat-input input {
+  background: rgba(255, 255, 255, 0.9) !important;
+  color: var(--light-text-primary) !important;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.message.cliente {
+  background: rgba(255, 255, 255, 0.95) !important;
+  color: var(--light-text-primary) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.message.agente,
+.message.ia {
+  background: linear-gradient(135deg, #ddd6fe 0%, #c4b5fd 100%) !important;
+  color: var(--light-text-primary) !important;
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.2);
+}
+
+/* ========================================
+   📱 WHATSAPP - DARK MODE
+   ======================================== */
+
+body.dark-mode .leads-panel {
+  background: rgba(26, 26, 46, 0.95) !important;
+  backdrop-filter: blur(20px);
+  border-right: 1px solid rgba(99, 102, 241, 0.2) !important;
+  box-shadow: 2px 0 30px rgba(99, 102, 241, 0.1);
+}
+
+body.dark-mode .leads-header {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%) !important;
+  border-bottom: 1px solid rgba(99, 102, 241, 0.2) !important;
+}
+
+body.dark-mode .search-container {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+body.dark-mode .search-container input {
+  color: var(--dark-text-primary) !important;
+}
+
+body.dark-mode .search-container i {
+  color: var(--dark-text-muted) !important;
+}
+
+body.dark-mode .lead-item {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+body.dark-mode .lead-item:hover,
+body.dark-mode .lead-item.active {
+  background: rgba(99, 102, 241, 0.15) !important;
+}
+
+body.dark-mode .lead-nome {
+  color: var(--dark-text-primary) !important;
+}
+
+body.dark-mode .lead-ultima-mensagem,
+body.dark-mode .msg-preview,
+body.dark-mode .lead-horario {
+  color: var(--dark-text-muted) !important;
+}
+
+body.dark-mode .chat-panel {
+  background: linear-gradient(135deg, #0f0f23 0%, #16213e 100%) !important;
+}
+
+body.dark-mode .chat-header {
+  background: rgba(26, 26, 46, 0.95) !important;
+  backdrop-filter: blur(15px);
+  border-bottom: 1px solid rgba(99, 102, 241, 0.2) !important;
+  box-shadow: 0 2px 20px rgba(99, 102, 241, 0.15);
+}
+
+body.dark-mode .chat-header h3 {
+  color: var(--dark-text-primary) !important;
+}
+
+body.dark-mode .chat-messages {
+  background: linear-gradient(135deg, #0f0f23 0%, #16213e 100%) !important;
+}
+
+body.dark-mode .chat-input {
+  background: rgba(26, 26, 46, 0.95) !important;
+  backdrop-filter: blur(15px);
+  border-top: 1px solid rgba(99, 102, 241, 0.2) !important;
+}
+
+body.dark-mode .chat-input input {
+  background: rgba(255, 255, 255, 0.05) !important;
+  color: var(--dark-text-primary) !important;
+  border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+body.dark-mode .chat-input input::placeholder {
+  color: var(--dark-text-muted) !important;
+}
+
+body.dark-mode .message.cliente {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: var(--dark-text-primary) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .message.agente {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.25) 0%, rgba(139, 92, 246, 0.2) 100%) !important;
+  color: var(--dark-text-primary) !important;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+}
+
+body.dark-mode .message.ia {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.25) 0%, rgba(99, 102, 241, 0.2) 100%) !important;
+  color: var(--dark-text-primary) !important;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+/* Modais WhatsApp - Dark Mode */
+body.dark-mode .modal-content,
+body.dark-mode .modal-nova-content {
+  background: var(--dark-bg-secondary) !important;
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8);
+}
+
+body.dark-mode .modal-header,
+body.dark-mode .modal-nova-header {
+  background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%) !important;
+}
+
+body.dark-mode .modal-body,
+body.dark-mode .modal-nova-body {
+  background: var(--dark-bg-secondary) !important;
+}
+
+body.dark-mode .modal-body input,
+body.dark-mode .modal-nova-body input,
+body.dark-mode .modal-nova-body textarea {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(99, 102, 241, 0.2) !important;
+  color: var(--dark-text-primary) !important;
+}
+
+body.dark-mode .modal-footer,
+body.dark-mode .modal-nova-footer {
+  background: rgba(26, 26, 46, 0.5) !important;
+}
+
+body.dark-mode .chat-document {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(99, 102, 241, 0.2) !important;
+  color: var(--dark-text-primary) !important;
+}
+
+body.dark-mode .chatwoot-loading-full {
+  background: var(--dark-bg-primary) !important;
+  color: var(--dark-text-primary) !important;
+}
+
+/* ========================================
+   🔘 TOGGLE THEME BUTTON
+   ======================================== */
+
+.theme-toggle-btn {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  box-shadow:
+    0 8px 20px rgba(99, 102, 241, 0.4),
+    0 0 40px rgba(99, 102, 241, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 24px;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.theme-toggle-btn:hover {
+  transform: scale(1.1) rotate(10deg);
+  box-shadow:
+    0 12px 30px rgba(99, 102, 241, 0.6),
+    0 0 60px rgba(99, 102, 241, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.theme-toggle-btn:active {
+  transform: scale(0.95) rotate(5deg);
+}
+
+/* ========================================
+   📱 RESPONSIVO
+   ======================================== */
+
+@media (max-width: 768px) {
+  .theme-toggle-btn {
+    width: 50px;
+    height: 50px;
+    font-size: 20px;
+    top: 15px;
+    right: 15px;
+  }
+}
+
+/* ========================================
+   ✨ EFEITOS ESPECIAIS
+   ======================================== */
+
+/* Brilho nos cards */
+.card::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  /* height: 200%; */
+  background: linear-gradient(45deg,
+      transparent,
+      rgba(255, 255, 255, 0.03),
+      transparent);
+  transform: rotate(45deg);
+  pointer-events: none;
+}
+
+body.dark-mode .card::after {
+  background: linear-gradient(45deg,
+      transparent,
+      rgba(99, 102, 241, 0.05),
+      transparent);
+}
+
+/* Animação de entrada suave */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.card {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+/* Scrollbar customizada */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--light-bg-tertiary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, var(--accent-secondary), var(--accent-primary));
+}
+
+body.dark-mode ::-webkit-scrollbar-track {
+  background: var(--dark-bg-secondary);
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+  .theme-toggle-btn {
+    width: 50px;
+    height: 50px;
+    font-size: 20px;
+    top: 15px;
+    right: 15px;
+  }
+}
+
+/* Transitions globais */
+* {
+  transition-property: background-color, border-color, color, box-shadow;
+  transition-duration: 0.3s;
+  transition-timing-function: ease;
+}
+
+button,
+a,
+input,
+select,
+textarea {
+  transition-duration: 0.2s;
+}
