@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="pt-br" class="h-full bg-gradient-to-br from-gray-50 to-gray-100">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Agendamentos - Fabrica Neural CRM</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="assets/themes.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+    
+    body { font-family: 'Inter', sans-serif; }
+    
+    .card {
+      background: rgba(255, 255, 255, 0.98);
+      backdrop-filter: blur(15px);
+      border-radius: 20px;
+      border: 1px solid rgba(0, 0, 0, 0.05);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.07);
+    }
+    
+    .sidebar {
+      background: linear-gradient(180deg, #111827 0%, #030712 100%);
+      border-right: 1px solid #1f2937;
+      transition: transform 0.3s ease-in-out;
+    }
+    
+    .sidebar-item-active {
+      background-color: #4f46e5;
+      color: white;
+      box-shadow: 0 4px 10px rgba(79, 70, 229, 0.5);
+      border-radius: 12px;
+    }
+    
+    .sidebar-link {
+      transition: all 0.2s;
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-size: 0.95rem;
+    }
+    
+    .sidebar-link:hover { background-color: #1f2937; color: #d1d5db; }
+    
+    .tab-button {
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: 2px solid transparent;
+    }
+    
+    .tab-button.active {
+      background-color: #4f46e5;
+      color: white;
+      box-shadow: 0 4px 10px rgba(79, 70, 229, 0.5);
+    }
+    
+    .tab-button:not(.active) {
+      background-color: rgba(79, 70, 229, 0.1);
+      color: #4f46e5;
+    }
+    
+    .modal-overlay {
+      background-color: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
+    }
+    
+    .modal-content {
+      background: rgba(255, 255, 255, 0.98);
+      backdrop-filter: blur(15px);
+      border-radius: 20px;
+      border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+    
+    .input-field {
+      background-color: rgba(255, 255, 255, 0.9);
+      border: 1.5px solid rgba(79, 70, 229, 0.3);
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-size: 0.95rem;
+      transition: all 0.3s ease;
+      color: #1f2937;
+    }
+    
+    .input-field::placeholder {
+      color: #9ca3af;
+    }
+    
+    .input-field option {
+      color: #1f2937;
+      background-color: #ffffff;
+    }
+    
+    .input-field:focus {
+      outline: none;
+      border-color: #4f46e5;
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+      background-color: #ffffff;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4);
+    }
+    
+    .btn-secondary {
+      background-color: rgba(79, 70, 229, 0.1);
+      color: #4f46e5;
+      padding: 10px 20px;
+      border-radius: 12px;
+      border: 1.5px solid #4f46e5;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+    
+    .btn-secondary:hover {
+      background-color: rgba(79, 70, 229, 0.2);
+    }
+    
+    .btn-danger {
+      background-color: #ef4444;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+    
+    .btn-danger:hover {
+      background-color: #dc2626;
+    }
+    
+    .btn-small {
+      padding: 6px 12px;
+      font-size: 0.85rem;
+    }
+    
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+    
+    .badge-success { background-color: rgba(16, 185, 129, 0.2); color: #059669; }
+    .badge-warning { background-color: rgba(245, 158, 11, 0.2); color: #92400e; }
+    .badge-danger { background-color: rgba(239, 68, 68, 0.2); color: #991b1b; }
+    
+    .table-row {
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+      transition: background-color 0.2s ease;
+    }
+    
+    .table-row:hover {
+      background-color: rgba(79, 70, 229, 0.05);
+    }
+    
+    .checkbox-custom {
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border: 2px solid #4f46e5;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .checkbox-custom:checked {
+      background-color: #4f46e5;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3E%3C/svg%3E");
+      background-size: 100%;
+      background-repeat: no-repeat;
+      background-position: center;
+    }
+    
+    @media (max-width: 768px) {
+      .sidebar { position: fixed; transform: translateX(-100%); width: 260px; z-index: 50; height: 100vh; }
+      .sidebar.open { transform: translateX(0); }
+      .pl-72 { padding-left: 0 !important; }
+      .hamburger { display: block; }
+      header { height: 64px; padding: 0 12px !important; }
+    }
+    
+    .hamburger { display: none; cursor: pointer; }
+  </style>
+</head>
+<body class="h-full bg-gradient-to-br from-gray-50 to-gray-100">
+  <div class="flex h-screen overflow-hidden">
+    <!-- Sidebar -->
+    <div class="fixed inset-y-0 z-50 w-72 sidebar text-white p-6 shadow-2xl">
+        <div class="flex h-16 shrink-0 items-center">
+          <div class="flex items-center gap-3">
+            <div id="profile-image" class="h-9 w-9 rounded-full bg-indigo-500 flex items-center justify-center text-xl font-bold flex-shrink-0 shadow-lg"></div>
+            <h1 id="sidebar-main-title" class="text-2xl font-extrabold text-white tracking-wider"></h1>
+          </div>
+        </div>
+        <nav class="flex flex-1 flex-col overflow-y-auto mt-10">
+          <ul role="list" class="flex flex-1 flex-col gap-y-3">
+            <li>
+              <ul role="list" class="space-y-1">
+                <li><a href="dashboard.html" class=" text-white group flex items-center gap-x-3 text-sm leading-6 font-semibold shadow-lg transition-colors sidebar-link"><i class="bi bi-speedometer2 text-lg"></i> Dashboard</a></li>
+                <li><a href="leads.html" class="text-gray-300 hover:text-white group flex items-center gap-x-3 text-sm leading-6 font-semibold transition-colors sidebar-link"><i class="bi bi-kanban text-lg"></i> Leads</a></li>
+                <li><a href="enviar_mensagem.html" class="text-gray-300 hover:text-white group flex items-center gap-x-3 text-sm leading-6 font-semibold transition-colors sidebar-link"><i class="bi bi-whatsapp text-lg"></i> WhatsApp</a></li>
+                <li><a href="agendamentos.html" class="sidebar-item-active text-white group flex items-center gap-x-3 text-sm leading-6 font-semibold shadow-lg transition-colors sidebar-link"><i class="bi bi-calendar-check text-lg"></i> Agendamentos</a></li>
+                <li><a href="etiquetas.html" class="text-gray-300 hover:text-white group flex items-center gap-x-3 text-sm leading-6 font-semibold transition-colors sidebar-link"><i class="bi bi-tags-fill text-lg"></i> Etiquetas</a></li>
+                <li><a href="rastreamento.html" class="text-gray-300 hover:text-white group flex items-center gap-x-3 text-sm leading-6 font-semibold transition-colors sidebar-link"><i class="bi bi-signpost-split text-lg"></i> Rastreamento</a></li>
+                <li><a href="canais.html" class="text-gray-300 hover:text-white group flex items-center gap-x-3 text-sm leading-6 font-semibold transition-colors sidebar-link"><i class="bi bi-broadcast text-lg"></i> Canais</a></li>
+                <li><a href="integracoes.html" class="text-gray-300 hover:text-white group flex items-center gap-x-3 text-sm leading-6 font-semibold transition-colors sidebar-link"><i class="bi bi-plug text-lg"></i> Integrações</a></li>
+              </ul>
+            </li>
+            <li class="mt-auto">
+              <ul role="list" class="space-y-1 pt-6 border-t border-gray-700">
+                <li><a href="minha-conta.html" class="text-gray-300 hover:text-white group flex items-center gap-x-3 text-sm leading-6 font-semibold transition-colors sidebar-link"><i class="bi bi-person-circle text-lg"></i> Minha Conta</a></li>
+                <li><button id="logout-button" class="w-full text-left text-gray-300 hover:text-white group flex items-center gap-x-3 text-sm leading-6 font-semibold transition-colors sidebar-link"><i class="bi bi-box-arrow-right text-lg"></i> Sair</button></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+      </div>
+
+    <!-- Main Content -->
+    <main class="flex-1 overflow-auto pl-0 md:pl-72">
+      <!-- Header -->
+      <header class="bg-white border-b border-gray-200 sticky top-0 z-40 backdrop-filter backdrop-blur-lg bg-opacity-90">
+        <div class="flex items-center justify-between h-16 px-6">
+          <div class="flex items-center gap-4">
+            <button id="hamburger-btn" class="hamburger text-gray-700">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+              </svg>
+            </button>
+            <h1 class="text-2xl font-bold text-gray-900">📅 Agendamentos</h1>
+          </div>
+          <div id="theme-toggle" class="cursor-pointer text-2xl">🌙</div>
+        </div>
+      </header>
+
+      <!-- Content Area -->
+      <div class="p-6 max-w-7xl mx-auto">
+        <!-- Tab Navigation -->
+        <div class="flex gap-4 mb-6 flex-wrap">
+          <button class="tab-button" data-tab="agendas">📋 Gerenciar Agendas</button>
+          <button class="tab-button" data-tab="criar-agendamento">🎯 Criar Agendamento</button>
+          <button class="tab-button active" data-tab="visualizar">👀 Visualizar Agendamentos</button>
+        </div>
+
+        <!-- TAB 1: Gerenciar Agendas -->
+        <div id="tab-agendas" class="tab-content hidden">
+          <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold text-white">Gerenciar Agendas</h2>
+            <button id="btn-nova-agenda" class="btn-primary">+ Nova Agenda</button>
+          </div>
+          
+          <div class="mb-6">
+            <input type="text" id="filtro-agendas-busca" class="input-field w-full md:w-80" placeholder="Buscar por nome ou especialidade...">
+          </div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="agendas-grid">
+            <!-- Agendas serão inseridas aqui -->
+          </div>
+          
+          <div id="agendas-empty" class="text-center py-12 card">
+            <p class="text-gray-500 text-lg">Nenhuma agenda criada ainda</p>
+            <button id="btn-nova-agenda-empty" class="btn-primary mt-4">Criar Primeira Agenda</button>
+          </div>
+        </div>
+
+        <!-- TAB 2: Criar Agendamento -->
+        <div id="tab-criar-agendamento" class="tab-content hidden">
+          <h2 class="text-2xl font-bold text-white mb-6">Criar Novo Agendamento</h2>
+          <div class="card p-8 max-w-2xl">
+            <form id="form-novo-agendamento" class="space-y-6">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Nome do Paciente -->
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 mb-2">Nome do Paciente *</label>
+                  <input type="text" id="agenda-paciente-nome" class="input-field w-full" required placeholder="Seu nome">
+                </div>
+
+                <!-- CPF -->
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 mb-2">CPF</label>
+                  <input type="text" id="agenda-paciente-cpf" class="input-field w-full" placeholder="000.000.000-00" maxlength="14">
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Email -->
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 mb-2">Email *</label>
+                  <input type="email" id="agenda-paciente-email" class="input-field w-full" required placeholder="email@exemplo.com">
+                </div>
+
+                <!-- Telefone -->
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 mb-2">Telefone *</label>
+                  <input type="tel" id="agenda-paciente-telefone" class="input-field w-full" placeholder="(11) 99999-9999">
+                </div>
+              </div>
+
+              <!-- Escolher Agenda -->
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Agenda *</label>
+                <select id="agenda-escolhida" class="input-field w-full" required>
+                  <option value="">Selecione uma agenda...</option>
+                </select>
+              </div>
+
+              <!-- Especialidade (preenchida automaticamente) -->
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Especialidade</label>
+                <input type="text" id="agenda-paciente-especialidade" class="input-field w-full" readonly placeholder="Preenchida automaticamente">
+              </div>
+
+              <!-- Médico (preenchida automaticamente ou manual) -->
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Médico</label>
+                <input type="text" id="agenda-paciente-medico" class="input-field w-full" placeholder="Preenchida automaticamente ou manual">
+              </div>
+
+              <!-- Data do Agendamento -->
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Data *</label>
+                <input type="date" id="agenda-paciente-data" class="input-field w-full" required>
+              </div>
+
+              <!-- Hora do Agendamento -->
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Hora *</label>
+                <select id="agenda-paciente-hora" class="input-field w-full" required>
+                  <option value="">Selecione um horário...</option>
+                </select>
+              </div>
+
+              <!-- Botões -->
+              <div class="flex gap-4 pt-4">
+                <button type="submit" class="btn-primary flex-1">Agendar Paciente</button>
+                <button type="reset" class="btn-secondary flex-1">Limpar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- TAB 3: Visualizar Agendamentos -->
+        <div id="tab-visualizar" class="tab-content">
+          <h2 class="text-2xl font-bold text-white mb-6">Visualizar Agendamentos</h2>
+          
+          <!-- Filtros por Agenda e Status -->
+          <div class="card p-6 mb-6">
+            <div class="flex flex-col md:flex-row gap-4">
+              <div class="flex-1">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Agenda</label>
+                <select id="filtro-agenda" class="input-field w-full">
+                  <option value="">Todas as Agendas</option>
+                </select>
+              </div>
+              <div class="flex-1">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Status</label>
+                <select id="filtro-status" class="input-field w-full">
+                  <option value="">Todos os Status</option>
+                  <option value="agendado">Agendado</option>
+                  <option value="remarcado">Remarcado</option>
+                  <option value="cancelado">Cancelado</option>
+                  <option value="compareceu">Compareceu</option>
+                  <option value="falta">Falta</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tabela de Agendamentos -->
+          <div class="card overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead class="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  <th class="px-6 py-3 text-left font-semibold text-gray-700">Paciente</th>
+                  <th class="px-6 py-3 text-left font-semibold text-gray-700">Agenda</th>
+                  <th class="px-6 py-3 text-left font-semibold text-gray-700">Data/Hora</th>
+                  <th class="px-6 py-3 text-left font-semibold text-gray-700">Médico</th>
+                  <th class="px-6 py-3 text-left font-semibold text-gray-700">Status</th>
+                  <th class="px-6 py-3 text-left font-semibold text-gray-700">Agendado em</th>
+                  <th class="px-6 py-3 text-left font-semibold text-gray-700">Ações</th>
+                </tr>
+              </thead>
+              <tbody id="agendamentos-tbody">
+                <tr>
+                  <td colspan="6" class="px-6 py-8 text-center text-gray-700">
+                    Nenhum agendamento encontrado
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- MODAL: Nova Agenda -->
+  <div id="modal-nova-agenda" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 p-4">
+    <div class="modal-content w-full max-w-2xl max-h-screen overflow-y-auto">
+      <div class="sticky top-0 bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-6 flex justify-between items-center">
+        <h3 class="text-xl font-bold">Nova Agenda</h3>
+        <button class="modal-close text-2xl cursor-pointer">×</button>
+      </div>
+      
+      <form id="form-nova-agenda" class="p-6 space-y-6">
+        <!-- Nome da Agenda -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">Nome da Agenda *</label>
+          <input type="text" id="modal-agenda-nome" class="input-field w-full" required placeholder="Ex: Dermatologia">
+        </div>
+
+        <!-- Descrição -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">Descrição</label>
+          <textarea id="modal-agenda-descricao" class="input-field w-full h-24 resize-none" placeholder="Descrição da agenda..."></textarea>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Especialidade -->
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Especialidade</label>
+            <input type="text" id="modal-agenda-especialidade" class="input-field w-full" placeholder="Ex: Dermatologia">
+          </div>
+
+          <!-- Nome do Médico -->
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Nome do Médico</label>
+            <input type="text" id="modal-agenda-medico" class="input-field w-full" placeholder="Ex: Dr. João Silva">
+          </div>
+        </div>
+
+        <!-- Dias de Atendimento -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-3">Dias de Atendimento</label>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" class="checkbox-custom dia-checkbox" value="segunda"> <span class="text-sm text-gray-700">Segunda</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" class="checkbox-custom dia-checkbox" value="terça"> <span class="text-sm text-gray-700">Terça</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" class="checkbox-custom dia-checkbox" value="quarta"> <span class="text-sm text-gray-700">Quarta</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" class="checkbox-custom dia-checkbox" value="quinta"> <span class="text-sm text-gray-700">Quinta</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" class="checkbox-custom dia-checkbox" value="sexta"> <span class="text-sm text-gray-700">Sexta</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" class="checkbox-custom dia-checkbox" value="sábado"> <span class="text-sm text-gray-700">Sábado</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" class="checkbox-custom dia-checkbox" value="domingo"> <span class="text-sm text-gray-700">Domingo</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Opção de Horários -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-3">Configuração de Horários *</label>
+          <div class="space-y-3">
+            <label class="flex items-center gap-3 cursor-pointer">
+              <input type="radio" name="tipo-horarios" value="padrao" class="w-4 h-4" required checked>
+              <span class="text-sm text-gray-700">Horários Padrão (igual para todos os dias)</span>
+            </label>
+            <label class="flex items-center gap-3 cursor-pointer">
+              <input type="radio" name="tipo-horarios" value="personalizado" class="w-4 h-4" required>
+              <span class="text-sm text-gray-700">Horários Personalizados (por dia)</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Seção PADRÃO -->
+        <div id="secao-horarios-padrao">
+          <!-- Tipo de Atendimento -->
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-3">Tipo de Atendimento *</label>
+            <div class="space-y-3">
+              <label class="flex items-center gap-3 cursor-pointer">
+                <input type="radio" name="tipo-atendimento" value="marcado" class="w-4 h-4" data-required-field required>
+                <span class="text-sm text-gray-700">Hora Marcada</span>
+              </label>
+              <label class="flex items-center gap-3 cursor-pointer">
+                <input type="radio" name="tipo-atendimento" value="ordem" class="w-4 h-4" data-required-field required>
+                <span class="text-sm text-gray-700">Ordem de Chegada</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Intervalo entre Agendamentos (só aparece se for Hora Marcada) -->
+          <div id="intervalo-container" class="hidden">
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Intervalo entre Agendamentos (minutos) *</label>
+            <input type="number" id="modal-agenda-intervalo" class="input-field w-full" data-required-field min="5" max="240" placeholder="Ex: 30" required>
+          </div>
+
+          <!-- Horário de Início -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Horário de Início *</label>
+              <input type="time" id="modal-agenda-horario-inicio" class="input-field w-full" data-required-field required>
+            </div>
+
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Horário de Fim *</label>
+              <input type="time" id="modal-agenda-horario-fim" class="input-field w-full" data-required-field required>
+            </div>
+          </div>
+        </div>
+
+        <!-- Seção PERSONALIZADO -->
+        <div id="secao-horarios-personalizado" class="hidden">
+          <p class="text-sm text-gray-600 mb-4">Configure os horários para cada dia de atendimento:</p>
+          <div id="container-horarios-personalizados" class="space-y-4">
+            <!-- Será preenchido dinamicamente -->
+          </div>
+        </div>
+
+        <!-- Botões -->
+        <div class="flex gap-4 pt-4 border-t">
+          <button type="submit" class="btn-primary flex-1">Criar Agenda</button>
+          <button type="button" class="btn-secondary flex-1 modal-close">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Editar Agenda -->
+  <div id="modal-editar-agenda" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 p-4">
+    <div class="modal-content w-full max-w-2xl max-h-screen overflow-y-auto">
+      <div class="sticky top-0 bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-6 flex justify-between items-center">
+        <h3 class="text-xl font-bold">Editar Agenda</h3>
+        <button class="modal-close text-2xl cursor-pointer">×</button>
+      </div>
+      
+      <form id="form-editar-agenda" class="p-6 space-y-6">
+        <input type="hidden" id="edit-agenda-id">
+
+        <!-- Nome da Agenda -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">Nome da Agenda *</label>
+          <input type="text" id="edit-modal-agenda-nome" class="input-field w-full" required>
+        </div>
+
+        <!-- Descrição -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">Descrição</label>
+          <textarea id="edit-modal-agenda-descricao" class="input-field w-full h-24 resize-none"></textarea>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Especialidade -->
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Especialidade</label>
+            <input type="text" id="edit-modal-agenda-especialidade" class="input-field w-full">
+          </div>
+
+          <!-- Nome do Médico -->
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Nome do Médico</label>
+            <input type="text" id="edit-modal-agenda-medico" class="input-field w-full">
+          </div>
+        </div>
+
+        <!-- Dias de Atendimento -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-3">Dias de Atendimento</label>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" class="checkbox-custom edit-dia-checkbox" value="segunda"> Segunda
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" class="checkbox-custom edit-dia-checkbox" value="terça"> Terça
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" class="checkbox-custom edit-dia-checkbox" value="quarta"> Quarta
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" class="checkbox-custom edit-dia-checkbox" value="quinta"> Quinta
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" class="checkbox-custom edit-dia-checkbox" value="sexta"> Sexta
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" class="checkbox-custom edit-dia-checkbox" value="sábado"> Sábado
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" class="checkbox-custom edit-dia-checkbox" value="domingo"> Domingo
+            </label>
+          </div>
+        </div>
+
+        <!-- Opção de Horários -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-3">Configuração de Horários *</label>
+          <div class="space-y-3">
+            <label class="flex items-center gap-3 cursor-pointer">
+              <input type="radio" name="edit-tipo-horarios" value="padrao" class="w-4 h-4" required>
+              <span>Horários Padrão (igual para todos os dias)</span>
+            </label>
+            <label class="flex items-center gap-3 cursor-pointer">
+              <input type="radio" name="edit-tipo-horarios" value="personalizado" class="w-4 h-4" required>
+              <span>Horários Personalizados (por dia)</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Seção PADRÃO (Editar) -->
+        <div id="edit-secao-horarios-padrao">
+          <!-- Tipo de Atendimento -->
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-3">Tipo de Atendimento *</label>
+            <div class="space-y-3">
+              <label class="flex items-center gap-3 cursor-pointer">
+                <input type="radio" name="edit-tipo-atendimento" value="marcado" class="w-4 h-4" data-required-field required>
+                <span>Hora Marcada</span>
+              </label>
+              <label class="flex items-center gap-3 cursor-pointer">
+                <input type="radio" name="edit-tipo-atendimento" value="ordem" class="w-4 h-4" data-required-field required>
+                <span>Ordem de Chegada</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Intervalo entre Agendamentos -->
+          <div id="edit-intervalo-container" class="hidden">
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Intervalo entre Agendamentos (minutos) *</label>
+            <input type="number" id="edit-modal-agenda-intervalo" class="input-field w-full" data-required-field min="5" max="240" required>
+          </div>
+
+          <!-- Horário de Início -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Horário de Início *</label>
+              <input type="time" id="edit-modal-agenda-horario-inicio" class="input-field w-full" data-required-field required>
+            </div>
+
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Horário de Fim *</label>
+              <input type="time" id="edit-modal-agenda-horario-fim" class="input-field w-full" data-required-field required>
+            </div>
+          </div>
+        </div>
+
+        <!-- Seção PERSONALIZADO (Editar) -->
+        <div id="edit-secao-horarios-personalizado" class="hidden">
+          <p class="text-sm text-gray-600 mb-4">Configure os horários para cada dia de atendimento:</p>
+          <div id="edit-container-horarios-personalizados" class="space-y-4">
+            <!-- Será preenchido dinamicamente -->
+          </div>
+        </div>
+
+        <!-- Botões -->
+        <div class="flex gap-4 pt-4 border-t">
+          <button type="submit" class="btn-primary flex-1">Atualizar Agenda</button>
+          <button type="button" class="btn-secondary flex-1 modal-close">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Editar Agendamento -->
+  <div id="modal-editar-agendamento" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 p-4">
+    <div class="modal-content w-full max-w-2xl max-h-screen overflow-y-auto">
+      <div class="sticky top-0 bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-6 flex justify-between items-center">
+        <h3 class="text-xl font-bold">Reagendar / Editar Agendamento</h3>
+        <button class="modal-close text-2xl cursor-pointer">×</button>
+      </div>
+      
+      <form id="form-editar-agendamento" class="p-6 space-y-6">
+        <input type="hidden" id="edit-agendamento-id">
+
+        <!-- Nome do Paciente (readonly) -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">Nome do Paciente</label>
+          <input type="text" id="edit-agendamento-paciente-nome" class="input-field w-full" readonly>
+        </div>
+
+        <!-- Escolher Agenda -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">Agenda *</label>
+          <select id="edit-agendamento-agenda" class="input-field w-full" required>
+            <option value="">Selecione uma agenda...</option>
+          </select>
+        </div>
+
+        <!-- Especialidade (preenchida automaticamente) -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">Especialidade</label>
+          <input type="text" id="edit-agendamento-especialidade" class="input-field w-full" readonly>
+        </div>
+
+        <!-- Médico -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">Médico</label>
+          <input type="text" id="edit-agendamento-medico" class="input-field w-full">
+        </div>
+
+        <!-- Data do Agendamento -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">Data *</label>
+          <input type="date" id="edit-agendamento-data" class="input-field w-full" required>
+        </div>
+
+        <!-- Hora do Agendamento -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">Hora *</label>
+          <select id="edit-agendamento-hora" class="input-field w-full" required>
+            <option value="">Selecione um horário...</option>
+          </select>
+        </div>
+
+        <!-- Status -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">Status</label>
+          <select id="edit-agendamento-status" class="input-field w-full">
+            <option value="agendado">Agendado</option>
+            <option value="remarcado">Remarcado</option>
+            <option value="cancelado">Cancelado</option>
+            <option value="compareceu">Compareceu</option>
+            <option value="falta">Falta</option>
+          </select>
+        </div>
+
+        <!-- Botões -->
+        <div class="flex gap-4 pt-4 border-t">
+          <button type="submit" class="btn-primary flex-1">Atualizar Agendamento</button>
+          <button type="button" class="btn-secondary flex-1 modal-close">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Dias de Atendimento -->
+  <div id="modal-dias-atendimento" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 p-4">
+    <div class="modal-content w-full max-w-md">
+      <div class="bg-gradient-to-r from-amber-500 to-amber-600 text-white p-6">
+        <h3 class="text-xl font-bold">⚠️ Dias de Atendimento</h3>
+      </div>
+      
+      <div class="p-6">
+        <p class="text-gray-700 mb-4">O médico atende apenas nos seguintes dias:</p>
+        <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
+          <p class="text-gray-800 font-medium" id="modal-dias-lista"></p>
+        </div>
+        
+        <button class="btn-primary w-full modal-close">Entendido</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Mensagem de Sucesso -->
+  <div id="modal-sucesso" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 p-4">
+    <div class="modal-content w-full max-w-md">
+      <div class="bg-gradient-to-r from-green-600 to-green-700 text-white p-6">
+        <h3 class="text-xl font-bold">✅ Sucesso</h3>
+      </div>
+      
+      <div class="p-6">
+        <p class="text-gray-700 mb-6" id="modal-sucesso-mensagem"></p>
+        
+        <button class="btn-primary w-full modal-close">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Erro Backend -->
+  <div id="modal-erro-backend" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 p-4">
+    <div class="modal-content w-full max-w-md">
+      <div class="bg-gradient-to-r from-red-600 to-red-700 text-white p-6">
+        <h3 class="text-xl font-bold">❌ Erro</h3>
+      </div>
+      
+      <div class="p-6">
+        <p class="text-gray-700 mb-6" id="modal-erro-mensagem"></p>
+        
+        <button class="btn-primary w-full modal-close">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Confirmar Cancelamento -->
+  <div id="modal-confirmar-cancelamento" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 p-4">
+    <div class="modal-content w-full max-w-md">
+      <div class="bg-gradient-to-r from-red-600 to-red-700 text-white p-6">
+        <h3 class="text-xl font-bold">Cancelar Agendamento</h3>
+      </div>
+      
+      <div class="p-6">
+        <p class="text-gray-700 mb-6">Tem certeza que deseja cancelar o agendamento de <strong id="modal-cancelamento-paciente"></strong>?</p>
+        
+        <div class="flex gap-4">
+          <button id="btn-confirmar-cancelamento" class="btn-danger flex-1">Confirmar Cancelamento</button>
+          <button class="btn-secondary flex-1 modal-close">Não, cancelar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="assets/theme-controller.js"></script>
+  <script src="assets/api.js"></script>
+  <script src="assets/auth.js"></script>
+  <script src="assets/agendamentos.js"></script>
+</body>
+</html>

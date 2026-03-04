@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="pt-br" class="h-full bg-gradient-to-br from-gray-50 to-gray-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minha Conta - Fabrica Neural CRM</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- CSS de Temas Dark/Light -->
+    <link rel="stylesheet" href="assets/themes.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <style>
+        /* Estilos base do Dashboard */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        body { 
+            font-family: 'Inter', sans-serif; 
+            height: 100vh;
+        }
+
+        /* Estilos do Glassy Card (Formulário/Lista) */
+        .card {
+            background: rgba(255, 255, 255, 0.98); 
+            backdrop-filter: blur(10px); 
+            border-radius: 20px; 
+            transition: transform 0.3s, box-shadow 0.3s;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.07); 
+        }
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1); 
+        }
+        
+        /* Estilos da Sidebar (Dashboard Theme) */
+        .sidebar {
+            background: linear-gradient(180deg, #111827 0%, #030712 100%);
+            border-right: 1px solid #1f2937;
+            transition: transform 0.3s ease-in-out;
+        }
+        .sidebar-item-active {
+            background-color: #4f46e5; /* indigo-600 */
+            color: white;
+            box-shadow: 0 4px 10px rgba(79, 70, 229, 0.5);
+            border-radius: 12px;
+        }
+        .sidebar-link {
+            transition: all 0.2s;
+            border-radius: 12px;
+            padding: 12px 16px;
+            font-size: 0.95rem;
+        }
+        .sidebar-link:hover {
+            background-color: #1f2937;
+            color: #d1d5db;
+        }
+
+        /* Estilo adicional para o div de perfil na sidebar */
+        #profile-image {
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        /* Media Query para Mobile (até 768px) */
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                transform: translateX(-100%);
+                width: 260px;
+                z-index: 50;
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            .pl-72 {
+                padding-left: 0 !important;
+            }
+            .card {
+                padding: 15px;
+                width: 100%;
+                margin: 0;
+            }
+            header {
+                height: 60px;
+                padding: 0 10px;
+            }
+            h1.text-4xl {
+                font-size: 1.5rem;
+            }
+            h2.text-2xl {
+                font-size: 1.2rem;
+            }
+            h3.text-xl {
+                font-size: 1.1rem;
+            }
+            p.text-lg {
+                font-size: 0.9rem;
+            }
+            input, textarea {
+                font-size: 0.9rem;
+                padding: 10px;
+                width: 100%;
+                max-width: 100%;
+            }
+            #save-button {
+                font-size: 1rem;
+                padding: 10px 20px;
+                width: 100%;
+            }
+            .grid {
+                grid-template-columns: 1fr !important;
+            }
+            #profile-image-preview {
+                width: 100px;
+                height: 100px;
+            }
+            #file-upload + label {
+                padding: 6px;
+            }
+            .mb-10 {
+                margin-bottom: 8px !important;
+            }
+            .max-w-4xl {
+                max-width: 100%;
+                padding: 0 10px;
+            }
+        }
+        #profile-image {
+    background-size: cover !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    background-color: transparent !important;
+    transition: none !important;
+}
+
+#profile-image:focus,
+#profile-image:hover,
+.sidebar-item-active #profile-image {
+    background-color: transparent !important;
+}
+
+    </style>
+</head>
+<body class="h-full">
+
+    <div class="flex h-screen">
+        <div class="fixed inset-y-0 z-50 w-72 sidebar text-white p-6 shadow-2xl">
+            <div class="flex h-16 shrink-0 items-center">
+                <div class="flex items-center gap-3">
+                    <div id="profile-image" class="h-9 w-9 rounded-full bg-indigo-500 flex items-center justify-center text-xl font-bold flex-shrink-0 shadow-lg"></div>
+                    <h1 id="sidebar-main-title" class="text-2xl font-extrabold text-white tracking-wider"></h1>
+                </div>
+            </div>
+            <nav class="flex flex-1 flex-col overflow-y-auto mt-10">
+                <ul role="list" class="flex flex-1 flex-col gap-y-3">
+                    <li>
+                        <ul role="list" class="space-y-1">
+                            <li><a href="dashboard.html" class="text-gray-300 hover:text-white group flex items-center gap-x-3 text-sm leading-6 font-semibold transition-colors sidebar-link"><i class="bi bi-speedometer2 text-lg"></i> Dashboard</a></li>
+                            <li><a href="leads.html" class="text-gray-300 hover:text-white group flex items-center gap-x-3 text-sm leading-6 font-semibold transition-colors sidebar-link"><i class="bi bi-kanban text-lg"></i> Leads</a></li>
+                            <li><a href="enviar_mensagem.html" class="text-gray-300 hover:text-white group flex items-center gap-x-3 text-sm leading-6 font-semibold transition-colors sidebar-link"><i class="bi bi-whatsapp text-lg"></i> WhatsApp</a></li>
+                            <li><a href="agendamentos.html" class="text-gray-300 hover:text-white group flex items-center gap-x-3 text-sm leading-6 font-semibold transition-colors sidebar-link"><i class="bi bi-calendar-check text-lg"></i> Agendamentos</a></li>
+                            <li><a href="etiquetas.html" class="text-gray-300 hover:text-white group flex items-center gap-x-3 text-sm leading-6 font-semibold transition-colors sidebar-link"><i class="bi bi-tags-fill text-lg"></i> Etiquetas</a></li>
+                            <li><a href="rastreamento.html" class="text-gray-300 hover:text-white group flex items-center gap-x-3 text-sm leading-6 font-semibold transition-colors sidebar-link"><i class="bi bi-signpost-split text-lg"></i> Rastreamento</a></li>
+                            <li><a href="canais.html" class="text-gray-300 hover:text-white group flex items-center gap-x-3 text-sm leading-6 font-semibold transition-colors sidebar-link"><i class="bi bi-broadcast text-lg"></i> Canais</a></li>
+                            <li><a href="integracoes.html" class="text-gray-300 hover:text-white group flex items-center gap-x-3 text-sm leading-6 font-semibold transition-colors sidebar-link"><i class="bi bi-plug text-lg"></i> Integrações</a></li>
+                            <li><a href="minha-conta.html" class="sidebar-item-active text-white group flex items-center gap-x-3 text-sm leading-6 font-semibold shadow-lg transition-colors sidebar-link"><i class="bi bi-person-circle text-lg"></i> Minha Conta</a></li>
+                        </ul>
+                    </li>
+                    <li class="mt-auto">
+                        <ul role="list" class="space-y-1 pt-6 border-t border-gray-700">
+                            <li><button id="logout-button" class="w-full text-left text-gray-300 hover:text-white group flex items-center gap-x-3 text-sm leading-6 font-semibold transition-colors sidebar-link"><i class="bi bi-box-arrow-right text-lg"></i> Sair</button></li>
+                        </ul>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+
+        <div class="pl-72 h-full flex flex-col overflow-hidden w-full">
+            <header class="sticky top-0 z-40 flex h-20 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white/95 px-8 shadow-md backdrop-blur-sm">
+                <button class="hamburger p-2 md:hidden">
+                    <i class="bi bi-list text-2xl text-gray-700"></i>
+                </button>
+                <h2 class="text-2xl font-bold text-gray-900">Minha Conta</h2>
+            </header>
+            <main class="flex-1 overflow-y-auto p-10">
+                <div class="max-w-4xl mx-auto">
+                    
+                    <div class="mb-10">
+                        <h1 class="text-4xl font-extrabold text-gray-900">Configurações de Perfil</h1>
+                        <p class="mt-2 text-lg text-gray-500">Atualize seus dados pessoais e sua foto de perfil.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        
+                        <div class="lg:col-span-1">
+                            <div class="card p-6 h-full flex flex-col items-center text-center">
+                                <h3 class="text-xl font-bold text-gray-900 mb-5">Foto de Perfil</h3>
+                                
+                                <div class="relative w-32 h-32 mb-4">
+                                    <img id="profile-image-preview" class="w-32 h-32 rounded-full object-cover border-4 border-indigo-500 shadow-lg" src="https://placehold.co/128x128/4f46e5/ffffff?text=FN" alt="Foto de Perfil">
+                                    
+                                    <label for="file-upload" class="absolute bottom-0 right-0 p-2 bg-indigo-600 rounded-full text-white cursor-pointer hover:bg-indigo-700 transition duration-150 shadow-md">
+                                        <i class="bi bi-camera-fill text-lg"></i>
+                                        <input id="file-upload" name="profile_image" type="file" class="sr-only" accept="image/*" onchange="window.handleImageUpload(event)">
+                                    </label>
+                                </div>
+                                <p id="profile-status" class="text-sm text-gray-500 mt-2">Carregue um novo avatar (max 4MB)</p>
+                            </div>
+                        </div>
+
+                        <div class="lg:col-span-2">
+                            <form id="profile-form" class="card p-6 space-y-6 h-full">
+                                <h3 class="text-xl font-bold text-gray-900 mb-5">Dados Pessoais</h3>
+
+                                <div>
+                                    <label for="user-name" class="block text-sm font-medium leading-6 text-gray-900">Nome Completo</label>
+                                    <input type="text" id="user-name" name="name" required
+                                           class="mt-2 block w-full rounded-xl border border-gray-300 py-3 px-4 text-gray-900 shadow-sm focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-base"
+                                           placeholder="Seu nome">
+                                </div>
+
+                                <div>
+                                    <label for="user-email" class="block text-sm font-medium leading-6 text-gray-900">Email (Apenas Leitura)</label>
+                                    <input type="email" id="user-email" name="email" value="" readonly disabled
+                                           class="mt-2 block w-full rounded-xl border border-gray-200 bg-gray-50 py-3 px-4 text-gray-500 shadow-inner sm:text-base"
+                                           aria-describedby="email-description">
+                                    <p class="mt-2 text-sm text-gray-500" id="email-description">O email é usado para login e não pode ser alterado.</p>
+                                </div>
+                                
+                                <div class="mt-8 pt-6 border-t border-gray-200">
+                                    <button type="submit" id="save-button" class="flex w-full justify-center rounded-xl bg-indigo-600 px-3 py-3 text-lg font-semibold text-white shadow-xl hover:bg-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transition-colors">
+                                        Salvar Alterações
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    <script>
+        // Toggle sidebar on hamburger click
+        const hamburger = document.querySelector('.hamburger');
+        const sidebar = document.querySelector('.sidebar');
+        hamburger.addEventListener('click', () => {
+            sidebar.classList.toggle('open');
+        });
+
+        // Close sidebar when clicking outside
+        document.addEventListener('click', (event) => {
+            if (!sidebar.contains(event.target) && !hamburger.contains(event.target)) {
+                sidebar.classList.remove('open');
+            }
+        });
+
+        document.getElementById('logout-button').addEventListener('click', () => {
+            if (typeof logout === 'function') {
+                logout();
+            } else {
+                console.error("Função 'logout' não definida. Verifique assets/auth.js.");
+            }
+        });
+    </script>
+    <script src="assets/minha_conta.js"></script>
+    <script src="assets/api.js"></script>
+    <script src="assets/auth.js"></script>
+    <!-- Script do Controlador de Temas -->
+    <script src="assets/theme-controller.js"></script>
+    <script>checkAuth(); /* Redireciona para /login.html se não houver token */</script>
+</body>
+</html>

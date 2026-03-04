@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="pt-br" class=" bg-gradient-to-br from-gray-50 to-gray-100">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Etiquetas - Fabrica Neural CRM</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="assets/themes.css">
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+      body { font-family: 'Inter', sans-serif; margin: 0; }
+      .card {
+        background: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(15px);
+        border-radius: 20px;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.07);
+      }
+      .sidebar {
+        background: linear-gradient(180deg, #111827 0%, #030712 100%);
+        border-right: 1px solid #1f2937;
+        transition: transform 0.3s ease-in-out;
+      }
+      .sidebar-item-active {
+        background-color: #4f46e5;
+        color: white;
+        box-shadow: 0 4px 10px rgba(79, 70, 229, 0.5);
+        border-radius: 12px;
+      }
+      .sidebar-link {
+        transition: all 0.2s;
+        border-radius: 12px;
+        padding: 12px 16px;
+        font-size: 0.95rem;
+      }
+      .sidebar-link:hover { background-color: #1f2937; color: #d1d5db; }
+      .hamburger { display: none; cursor: pointer; }
+      
+      /* Estilos das Etiquetas */
+      .tag-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 500;
+        transition: transform 0.2s, box-shadow 0.2s;
+        cursor: pointer;
+      }
+      .tag-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+      .color-option {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+        border: 3px solid transparent;
+      }
+      .color-option:hover {
+        transform: scale(1.1);
+      }
+      .color-option.selected {
+        border-color: #1f2937;
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.3);
+      }
+      .modal-backdrop {
+        background-color: rgba(0, 0, 0, 0.5);
+      }
+      
+      @media (max-width: 768px) {
+        .sidebar { position: fixed; transform: translateX(-100%); width: 260px; z-index: 50; height: 100vh; }
+        .sidebar.open { transform: translateX(0); }
+        .pl-72 { padding-left: 0 !important; }
+        .hamburger { display: block; }
+        header { height: 64px; padding: 0 12px !important; }
+        header h2 { font-size: 1.25rem; }
+        main { overflow-x: hidden; padding: 12px !important; }
+        .p-10 { padding: 12px !important; }
+      }
+      
+      #profile-image {
+        background-size: cover !important;
+        background-position: center !important;
+        background-repeat: no-repeat !important;
+        background-color: transparent !important;
+        transition: none !important;
+      }
+    </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+  </head>
+  <body>
+    <div class="flex ">
+      <!-- Sidebar -->
+      <div class="fixed inset-y-0 z-50 w-72 sidebar text-white p-6 shadow-2xl">
+        <div class="flex h-16 shrink-0 items-center min-h-[64px] overflow-hidden">
+          <div class="flex items-center gap-3">
+            <div id="profile-image" class="h-9 w-9 rounded-full bg-indigo-500 flex items-center justify-center text-xl font-bold flex-shrink-0 shadow-lg"></div>
+            <h1 id="sidebar-main-title" class="text-2xl font-extrabold text-white tracking-wider whitespace-nowrap overflow-hidden text-overflow-ellipsis"></h1>
+          </div>
+        </div>
+
+        <nav class="flex flex-1 flex-col overflow-y-auto mt-10">
+          <ul role="list" class="flex flex-1 flex-col gap-y-3">
+            <li>
+              <ul role="list" class="space-y-1">
+                <li><a href="dashboard.html" class="text-gray-300 hover:text-white group flex items-center gap-x-3 text-sm leading-6 font-semibold transition-colors sidebar-link"><i class="bi bi-speedometer2 text-lg"></i> Dashboard</a></li>
+                <li><a href="leads.html" class="text-gray-300 hover:text-white group flex items-center gap-x-3 text-sm leading-6 font-semibold transition-colors sidebar-link"><i class="bi bi-people-fill text-lg"></i> Leads</a></li>
+                <li><a href="enviar_mensagem.html" class="text-gray-300 hover:text-white group flex items-center gap-x-3 text-sm leading-6 font-semibold transition-colors sidebar-link"><i class="bi bi-whatsapp text-lg"></i> WhatsApp</a></li>
+                <li><a href="agendamentos.html" class="text-gray-300 hover:text-white group flex items-center gap-x-3 text-sm leading-6 font-semibold transition-colors sidebar-link"><i class="bi bi-calendar-check text-lg"></i> Agendamentos</a></li>
+                <li><a href="etiquetas.html" class="sidebar-item-active text-white group flex items-center gap-x-3 text-sm leading-6 font-semibold shadow-lg transition-colors sidebar-link"><i class="bi bi-tags-fill text-lg"></i> Etiquetas</a></li>
+                <li><a href="rastreamento.html" class="text-gray-300 hover:text-white group flex items-center gap-x-3 text-sm leading-6 font-semibold transition-colors sidebar-link"><i class="bi bi-signpost-split text-lg"></i> Rastreamento</a></li>
+                <li><a href="canais.html" class="text-gray-300 hover:text-white group flex items-center gap-x-3 text-sm leading-6 font-semibold transition-colors sidebar-link"><i class="bi bi-broadcast text-lg"></i> Canais</a></li>
+                <li><a href="integracoes.html" class="text-gray-300 hover:text-white group flex items-center gap-x-3 text-sm leading-6 font-semibold transition-colors sidebar-link"><i class="bi bi-plug text-lg"></i> Integrações</a></li>
+              </ul>
+            </li>
+            <li class="mt-auto">
+              <ul role="list" class="space-y-1 pt-6 border-t border-gray-700">
+                <li><a href="minha-conta.html" class="text-gray-300 hover:text-white group flex items-center gap-x-3 text-sm leading-6 font-semibold transition-colors sidebar-link"><i class="bi bi-person-circle text-lg"></i> Minha Conta</a></li>
+                <li><button id="logout-button" class="w-full text-left text-gray-300 hover:text-white group flex items-center gap-x-3 text-sm leading-6 font-semibold transition-colors sidebar-link"><i class="bi bi-box-arrow-right text-lg"></i> Sair</button></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+      </div>
+
+      <!-- Main Content -->
+      <div class="pl-72 h-full flex flex-col overflow-hidden w-full">
+        <header class="sticky top-0 z-40 flex h-20 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white/95 px-8 shadow-md backdrop-blur-sm">
+          <button class="hamburger p-2">
+            <i class="bi bi-list text-2xl text-gray-700"></i>
+          </button>
+          <h2 class="text-2xl font-bold text-gray-900">Gerenciar Etiquetas</h2>
+        </header>
+
+        <main class="flex-1 p-10">
+          <!-- Botão Criar Nova Etiqueta -->
+          <div class="mb-6">
+            <button id="btn-nova-etiqueta" class="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white font-medium rounded-lg shadow-sm hover:bg-indigo-700 transition-colors">
+              <i class="bi bi-plus-circle text-lg"></i>
+              Nova Etiqueta
+            </button>
+          </div>
+
+          <!-- Lista de Etiquetas -->
+          <div class="card p-6 mb-4">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Suas Etiquetas</h3>
+            <div id="tags-container" class="flex flex-wrap gap-3">
+              <div class="text-center text-gray-500 py-8 w-full">Carregando etiquetas...</div>
+            </div>
+          </div>
+
+          <!-- Instruções de uso das etiquetas -->
+          <div class="card p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Instruções de uso das etiquetas</h3>
+            <div id="tags-container" class="flex flex-wrap gap-3">
+              <textarea id="instrucoes-etiqueta" rows="6" class="mt-1 mb-4 block w-full px-3 py-2 border rounded-md bg-white dark:bg-slate-900 dark:border-slate-600" placeholder="Descreva aqui as instruções..."></textarea>
+            </div>
+
+            <div class="flex items-center justify-between gap-4">
+            <button id="save-instrucoes-btn" class="px-6 py-2 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors">
+              Salvar instruções
+            </button>
+            <div id="msg" class="text-sm"></div>
+          </div>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <!-- Modal Criar/Editar Etiqueta -->
+    <div id="tag-modal" class="fixed inset-0 z-50 flex items-center justify-center overflow-auto hidden">
+      <div class="fixed inset-0 modal-backdrop transition-opacity"></div>
+      <div class="bg-white rounded-lg shadow-xl p-6 m-4 max-w-lg w-full z-10">
+        <div class="flex items-center justify-between mb-6">
+          <h3 id="modal-title" class="text-lg font-medium leading-6 text-gray-900">Nova Etiqueta</h3>
+          <button type="button" id="modal-close" class="text-gray-400 hover:text-gray-600 transition-colors">
+            <i class="bi bi-x-lg text-xl"></i>
+          </button>
+        </div>
+        
+        <form id="tag-form">
+          <input type="hidden" id="tag-id">
+          
+          <div class="mb-4">
+            <label for="tag-name" class="block text-sm font-medium text-gray-700 mb-2">Nome da Etiqueta</label>
+            <input type="text" id="tag-name" required maxlength="30" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2 px-3" placeholder="Ex: Urgente, VIP, Pendente...">
+          </div>
+          
+          <div class="mb-6">
+            <label class="block text-sm font-medium text-gray-700 mb-3">Escolha uma Cor</label>
+            <div id="color-picker" class="grid grid-cols-10 gap-2">
+              <!-- Cores serão inseridas aqui via JS -->
+            </div>
+            <input type="hidden" id="tag-color" required>
+          </div>
+          
+          <div class="mb-6">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Prévia</label>
+            <div id="tag-preview" class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gray-200 text-gray-700">
+              <i class="bi bi-tag-fill"></i>
+              <span>Nome da Etiqueta</span>
+            </div>
+          </div>
+          
+          <div class="flex justify-between gap-3 pt-4 border-t border-gray-200">
+            <button type="button" id="btn-delete-tag" class="px-5 py-2.5 bg-red-600 text-white border border-transparent rounded-lg hover:bg-red-700 transition-colors font-medium shadow-sm hidden">
+              <i class="bi bi-trash mr-2"></i>Excluir
+            </button>
+            <div class="flex gap-3 ml-auto">
+              <button type="button" id="btn-cancel" class="px-5 py-2.5 bg-gray-100 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-200 transition-colors font-medium">
+                Cancelar
+              </button>
+              <button type="submit" id="btn-save" class="px-5 py-2.5 bg-indigo-600 text-white border border-transparent rounded-lg hover:bg-indigo-700 transition-colors font-medium shadow-sm">
+                <i class="bi bi-check-circle mr-2"></i>Salvar
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    
+    <script src="assets/api.js"></script>
+    <script src="assets/auth.js"></script>
+    <script src="assets/global_ui.js"></script>
+    <script src="assets/etiquetas.js"></script>
+    <script>
+      if (typeof checkAuth === 'function') { checkAuth() }
+      document.getElementById('logout-button').addEventListener('click', () => {
+        if (typeof logout === 'function') { logout() }
+      })
+      const hamburger = document.querySelector('.hamburger')
+      const sidebar = document.querySelector('.sidebar')
+      hamburger.addEventListener('click', () => { sidebar.classList.toggle('open') })
+      document.addEventListener('click', event => {
+        if (!sidebar.contains(event.target) && !hamburger.contains(event.target)) {
+          sidebar.classList.remove('open')
+        }
+      })
+
+      // URLs (mesma base do dashboard)
+      const BASE_URL = 'https://auto.fabricaneural.ia.br/webhook';
+      const SAVE_INSTRUCOES_TAGS_URL = `${BASE_URL}/salvar-instrucoes-tags`;
+
+      const saveBtn = document.getElementById('save-instrucoes-btn');
+      const msgEl = document.getElementById('msg');
+
+      function showMessage(text, isError = false) {
+          msgEl.textContent = text;
+          msgEl.style.color = isError ? '#dc2626' : '#16a34a'; // red / green
+      }
+
+      async function postWithAuth(url, bodyObj) {
+          const token = localStorage.getItem('adminToken');
+          if (!token) {
+              window.location.href = 'login.html';
+              throw new Error('Token não encontrado');
+          }
+
+          const res = await fetch(url, {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${token}`
+              },
+              body: JSON.stringify(bodyObj)
+          });
+
+          if (res.status === 401) {
+              localStorage.removeItem('adminToken');
+              window.location.href = 'login.html';
+              throw new Error('Não autorizado');
+          }
+
+          if (!res.ok) {
+              const text = await res.text();
+              try {
+                  const json = JSON.parse(text);
+                  throw new Error(json.message || text || `Erro ${res.status}`);
+              } catch (e) {
+                  throw new Error(text || `Erro ${res.status}`);
+              }
+          }
+
+          // Retorna JSON se houver
+          try { return await res.json(); } catch { return null; }
+      }
+
+      saveBtn?.addEventListener('click', async () => {
+          const companyId = Number(document.getElementById('company-id').value || 0);
+          const instrucoes = document.getElementById('instrucoes-etiqueta').value || '';
+
+          if (!companyId) {
+              showMessage('Informe o ID da empresa.', true);
+              return;
+          }
+          if (!instrucoes.trim()) {
+              showMessage('Informe as instruções da etiqueta.', true);
+              return;
+          }
+
+          saveBtn.disabled = true;
+          saveBtn.textContent = 'Salvando...';
+          showMessage('');
+
+          try {
+              await postWithAuth(SAVE_INSTRUCOES_TAGS_URL, {
+                  id_empresa: companyId,
+                  instrucoes_etiqueta: instrucoes
+              });
+              showMessage('Instruções salvas com sucesso.');
+          } catch (err) {
+              console.error(err);
+              showMessage('Erro ao salvar: ' + (err.message || '...'), true);
+          } finally {
+              saveBtn.disabled = false;
+              saveBtn.textContent = 'Salvar instruções';
+          }
+      });
+    </script>
+  </body>
+</html>

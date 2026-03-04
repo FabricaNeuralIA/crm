@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="pt-br" class="h-full bg-gradient-to-br from-gray-50 to-gray-100">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Canais - Fabrica Neural CRM</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- CSS de Temas Dark/Light -->
+    <link rel="stylesheet" href="assets/themes.css">
+
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+      body { font-family: 'Inter', sans-serif; height: 100vh; }
+      .card {
+        background: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(15px);
+        border-radius: 20px;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.07);
+        transition: transform 0.3s, box-shadow 0.3s;
+      }
+      .card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+      }
+      .sidebar {
+        background: linear-gradient(180deg, #111827 0%, #030712 100%);
+        border-right: 1px solid #1f2937;
+        transition: transform 0.3s ease-in-out;
+      }
+      .sidebar-item-active {
+        background-color: #4f46e5;
+        color: white;
+        box-shadow: 0 4px 10px rgba(79, 70, 229, 0.5);
+        border-radius: 12px;
+      }
+      .sidebar-link {
+        transition: all 0.2s;
+        border-radius: 12px;
+        padding: 12px 16px;
+        font-size: 0.95rem;
+      }
+      .sidebar-link:hover { background-color: #1f2937; color: #d1d5db; }
+      .hamburger { display: none; cursor: pointer; }
+      @media (max-width: 768px) {
+        .sidebar { position: fixed; transform: translateX(-100%); width: 260px; z-index: 50; height: 100vh; }
+        .sidebar.open { transform: translateX(0); }
+        .pl-72 { padding-left: 0 !important; }
+        .hamburger { display: block; }
+        header { 
+          height: 64px; 
+          padding: 0 12px !important;
+        }
+        header h2 { 
+          font-size: 1.25rem !important; 
+        }
+        .px-8 { padding-left: 12px !important; padding-right: 12px !important; }
+        
+        /* Corrigir elementos vazando */
+        main { overflow-x: hidden; }
+        .p-10 { padding: 12px !important; }
+        .p-8 { padding: 12px !important; }
+        .card { width: 100%; max-width: 100%; box-sizing: border-box; }
+        .grid { grid-template-columns: 1fr !important; }
+        .lg\:grid-cols-2 { grid-template-columns: 1fr !important; }
+        .gap-8 { gap: 12px !important; }
+        .mb-8 { margin-bottom: 12px !important; }
+        h1.text-3xl { font-size: 1.25rem; }
+        p.text-lg { font-size: 0.8rem; }
+        
+        /* Ajustar header do card WhatsApp */
+        .flex.items-center.justify-between.mb-6 {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 12px;
+        }
+        
+        /* Ajustar inputs e botões */
+        #whatsapp-number { 
+          width: 100%; 
+          border-radius: 8px !important;
+        }
+        .flex.gap-2 > span { 
+          display: inline-flex; 
+          border-radius: 8px 0 0 8px !important;
+        }
+        .flex.gap-2 > input {
+          border-radius: 0 8px 8px 0 !important;
+        }
+        
+        /* QR Code e pairing code */
+        .qrcode-container { padding: 12px; }
+        .qrcode-container img, .w-64 { width: 180px !important; height: 180px !important; }
+        .text-4xl.font-mono { font-size: 1.25rem !important; letter-spacing: 0.15em !important; padding: 12px !important; }
+        
+        /* Ícone WhatsApp */
+        .w-16 { width: 40px !important; }
+        .h-16 { height: 40px !important; }
+        .w-16 i, .text-4xl { font-size: 1.5rem !important; }
+        
+        /* Info de conexão */
+        #connection-info .flex { flex-wrap: wrap; }
+        #connection-info img { width: 48px !important; height: 48px !important; }
+      }
+      #profile-image {
+        background-size: cover !important;
+        background-position: center !important;
+        background-repeat: no-repeat !important;
+        background-color: transparent !important;
+        transition: none !important;
+      }
+      .modal-backdrop {
+        background-color: rgba(0, 0, 0, 0.5);
+      }
+      .status-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        animation: pulse 2s infinite;
+      }
+      .status-dot.connected {
+        background-color: #22c55e;
+        box-shadow: 0 0 10px rgba(34, 197, 94, 0.5);
+      }
+      .status-dot.disconnected {
+        background-color: #ef4444;
+        box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+      }
+      .status-dot.connecting {
+        background-color: #f59e0b;
+        box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+      }
+      @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+      }
+      .qrcode-container {
+        background: white;
+        padding: 20px;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      }
+      .spin {
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+    </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+  </head>
+  <body class="h-full">
+    <div class="flex h-screen">
+      <!-- Sidebar -->
+      <div class="fixed inset-y-0 z-50 w-72 sidebar text-white p-6 shadow-2xl">
+        <div class="flex h-16 shrink-0 items-center">
+          <div class="flex items-center gap-3">
+            <div id="profile-image" class="h-9 w-9 rounded-full bg-indigo-500 flex items-center justify-center text-xl font-bold flex-shrink-0 shadow-lg"></div>
+            <h1 id="sidebar-main-title" class="text-2xl font-extrabold text-white tracking-wider"></h1>
+          </div>
+        </div>
+        <nav class="flex flex-1 flex-col overflow-y-auto mt-10">
+          <ul role="list" class="flex flex-1 flex-col gap-y-3">
+            <li>
+              <ul role="list" class="space-y-1">
+                <li><a href="dashboard.html" class="sidebar-item-active text-white group flex items-center gap-x-3 text-sm leading-6 font-semibold shadow-lg transition-colors sidebar-link"><i class="bi bi-speedometer2 text-lg"></i> Dashboard</a></li>
+                <li><a href="leads.html" class="text-gray-300 hover:text-white group flex items-center gap-x-3 text-sm leading-6 font-semibold transition-colors sidebar-link"><i class="bi bi-kanban text-lg"></i> Leads</a></li>
+                <li><a href="enviar_mensagem.html" class="text-gray-300 hover:text-white group flex items-center gap-x-3 text-sm leading-6 font-semibold transition-colors sidebar-link"><i class="bi bi-whatsapp text-lg"></i> WhatsApp</a></li>
+                <li><a href="agendamentos.html" class="text-gray-300 hover:text-white group flex items-center gap-x-3 text-sm leading-6 font-semibold transition-colors sidebar-link"><i class="bi bi-calendar-check text-lg"></i> Agendamentos</a></li>
+                <li><a href="etiquetas.html" class="text-gray-300 hover:text-white group flex items-center gap-x-3 text-sm leading-6 font-semibold transition-colors sidebar-link"><i class="bi bi-tags-fill text-lg"></i> Etiquetas</a></li>
+                <li><a href="rastreamento.html" class="text-gray-300 hover:text-white group flex items-center gap-x-3 text-sm leading-6 font-semibold transition-colors sidebar-link"><i class="bi bi-signpost-split text-lg"></i> Rastreamento</a></li>
+                <li><a href="canais.html" class="text-gray-300 hover:text-white group flex items-center gap-x-3 text-sm leading-6 font-semibold transition-colors sidebar-link"><i class="bi bi-broadcast text-lg"></i> Canais</a></li>
+                <li><a href="integracoes.html" class="text-gray-300 hover:text-white group flex items-center gap-x-3 text-sm leading-6 font-semibold transition-colors sidebar-link"><i class="bi bi-plug text-lg"></i> Integrações</a></li>
+              </ul>
+            </li>
+            <li class="mt-auto">
+              <ul role="list" class="space-y-1 pt-6 border-t border-gray-700">
+                <li><a href="minha-conta.html" class="text-gray-300 hover:text-white group flex items-center gap-x-3 text-sm leading-6 font-semibold transition-colors sidebar-link"><i class="bi bi-person-circle text-lg"></i> Minha Conta</a></li>
+                <li><button id="logout-button" class="w-full text-left text-gray-300 hover:text-white group flex items-center gap-x-3 text-sm leading-6 font-semibold transition-colors sidebar-link"><i class="bi bi-box-arrow-right text-lg"></i> Sair</button></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+      </div>
+
+      <!-- Main Content -->
+      <div class="pl-72 h-full flex flex-col overflow-hidden w-full">
+        <header class="sticky top-0 z-40 flex h-20 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white/95 px-8 shadow-md backdrop-blur-sm">
+          <button class="hamburger p-2">
+            <i class="bi bi-list text-2xl text-gray-700"></i>
+          </button>
+          <h2 class="text-2xl font-bold text-gray-900">Canais de Comunicação</h2>
+        </header>
+
+        <main class="flex-1 overflow-y-auto p-10">
+          <div class="mb-8">
+            <h1 class="text-3xl font-extrabold text-gray-900">Conecte seu WhatsApp</h1>
+            <p class="mt-2 text-lg text-gray-500">Gerencie seus canais de comunicação e conecte-se com seus clientes.</p>
+          </div>
+
+          <!-- Grid Principal -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            
+            <!-- Card Principal WhatsApp -->
+            <div class="card p-8">
+              <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center gap-4">
+                  <div class="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center">
+                    <i class="bi bi-whatsapp text-4xl text-green-600"></i>
+                  </div>
+                  <div>
+                    <h3 class="text-xl font-bold text-gray-900">WhatsApp Business</h3>
+                    <p class="text-sm text-gray-500">via UAZAPI</p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-2">
+                  <div id="status-dot" class="status-dot disconnected"></div>
+                  <span id="status-text" class="text-sm font-medium text-red-600">Desconectado</span>
+                </div>
+              </div>
+
+              <!-- Informações da Conexão (quando conectado) -->
+              <div id="connection-info" class="hidden mb-6 p-4 bg-green-50 rounded-xl border border-green-200">
+                <div class="flex items-center gap-4">
+                  <img id="connected-profile-pic" src="" alt="Foto do perfil" class="w-14 h-14 rounded-full object-cover border-2 border-green-400 shadow-md" />
+                  <div class="flex-1">
+                    <div class="flex items-center gap-2">
+                      <i class="bi bi-check-circle-fill text-green-600"></i>
+                      <p class="font-medium text-green-800">Conectado com sucesso!</p>
+                    </div>
+                    <p id="connected-profile-name" class="text-sm font-semibold text-gray-800 mt-1"></p>
+                    <p id="connected-number" class="text-sm text-green-600"></p>
+                  </div>
+                  <div id="business-badge" class="hidden px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">
+                    <i class="bi bi-briefcase-fill mr-1"></i>Business
+                  </div>
+                </div>
+              </div>
+
+              <!-- Formulário para conectar (quando desconectado) -->
+              <div id="connect-form-section">
+                <!-- Opção 1: QR Code (sem número) -->
+                <div class="mb-6">
+                  <button 
+                    id="btn-qrcode" 
+                    onclick="connectWithQRCode()"
+                    class="w-full py-4 px-6 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700 transition-colors flex items-center justify-center gap-3"
+                  >
+                    <i class="bi bi-qr-code-scan text-2xl"></i>
+                    <div class="text-left">
+                      <span class="block">Conectar com QR Code</span>
+                      <span class="block text-xs font-normal opacity-80">Escaneie com o WhatsApp</span>
+                    </div>
+                  </button>
+                </div>
+
+                <div class="relative mb-6">
+                  <div class="absolute inset-0 flex items-center">
+                    <div class="w-full border-t border-gray-200"></div>
+                  </div>
+                  <div class="relative flex justify-center text-sm">
+                    <span class="bg-white px-4 text-gray-500">ou</span>
+                  </div>
+                </div>
+
+                <!-- Opção 2: Código de Pareamento (com número) -->
+                <div class="p-4 bg-gray-50 rounded-xl border border-gray-200">
+                  <p class="text-sm font-medium text-gray-700 mb-3">
+                    <i class="bi bi-phone text-indigo-600 mr-1"></i>
+                    Conectar com código de pareamento
+                  </p>
+                  <div class="mb-3">
+                    <div class="flex gap-2">
+                      <span class="inline-flex items-center px-4 rounded-l-lg border border-r-0 border-gray-300 bg-white text-gray-500 text-sm">
+                        +55
+                      </span>
+                      <input 
+                        type="tel" 
+                        id="whatsapp-number" 
+                        placeholder="11999999999"
+                        class="flex-1 rounded-r-lg border-gray-300 shadow-sm py-3 px-4 focus:border-indigo-500 focus:ring-indigo-500"
+                        maxlength="11"
+                      >
+                    </div>
+                    <p class="mt-1 text-xs text-gray-500">Digite o DDD + número (apenas números)</p>
+                  </div>
+                  <button 
+                    id="btn-pairing-code" 
+                    onclick="connectWithPairingCode()"
+                    class="w-full py-2.5 px-4 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors flex items-center justify-center gap-2 text-sm"
+                  >
+                    <i class="bi bi-key"></i>
+                    Gerar código de pareamento
+                  </button>
+                </div>
+              </div>
+
+              <!-- QR Code Container -->
+              <div id="qrcode-section" class="hidden">
+                <div class="text-center mb-4">
+                  <p class="text-sm text-gray-600 mb-2">Escaneie o QR Code com seu WhatsApp</p>
+                  <p class="text-xs text-gray-400">Abra o WhatsApp > Menu > Dispositivos conectados > Conectar dispositivo</p>
+                </div>
+                <div class="flex justify-center">
+                  <div class="qrcode-container">
+                    <img id="qrcode-image" src="" alt="QR Code" class="w-64 h-64 object-contain" />
+                  </div>
+                </div>
+                <p id="qrcode-timer" class="text-center text-sm text-gray-500 mt-4"></p>
+              </div>
+
+              <!-- Pairing Code Container -->
+              <div id="pairing-code-section" class="hidden">
+                <div class="text-center">
+                  <p class="text-sm text-gray-600 mb-4">Digite este código no seu WhatsApp</p>
+                  <div class="bg-gray-900 text-white text-4xl font-mono py-6 px-8 rounded-2xl tracking-[0.3em] shadow-lg">
+                    <span id="pairing-code-display">--------</span>
+                  </div>
+                  <p class="text-xs text-gray-400 mt-4">Abra o WhatsApp > Menu > Dispositivos conectados > Conectar dispositivo > Conectar com número de telefone</p>
+                </div>
+                <p id="pairing-timer" class="text-center text-sm text-gray-500 mt-4"></p>
+              </div>
+
+              <!-- Loading State -->
+              <div id="loading-section" class="hidden text-center py-8">
+                <i class="bi bi-arrow-repeat text-4xl text-indigo-600 spin"></i>
+                <p id="loading-text" class="mt-4 text-gray-600">Carregando...</p>
+              </div>
+
+              <!-- Mensagem de Feedback -->
+              <div id="feedback-section" class="hidden mt-4">
+                <div id="feedback-content" class="p-3 rounded-lg text-sm"></div>
+              </div>
+
+              <!-- Botões de Ação -->
+              <div class="flex flex-col gap-3 mt-6">
+                <button 
+                  id="btn-disconnect" 
+                  onclick="disconnectWhatsApp()"
+                  class="hidden w-full py-3 px-6 bg-red-600 text-white rounded-xl font-semibold hover:bg-red-700 transition-colors flex items-center justify-center gap-2"
+                >
+                  <i class="bi bi-x-circle"></i>
+                  Desconectar
+                </button>
+
+                <button 
+                  id="btn-refresh" 
+                  onclick="checkConnectionStatus()"
+                  class="w-full py-3 px-6 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-colors flex items-center justify-center gap-2"
+                >
+                  <i class="bi bi-arrow-clockwise"></i>
+                  Atualizar Status
+                </button>
+              </div>
+            </div>
+
+            <!-- Card de Instruções -->
+            <div class="card p-8">
+              <h3 class="text-xl font-bold text-gray-900 mb-6">
+                <i class="bi bi-info-circle text-indigo-600 mr-2"></i>
+                Como conectar
+              </h3>
+
+              <div class="space-y-4">
+                <div class="flex gap-4">
+                  <div class="flex-shrink-0 w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
+                    <span class="text-indigo-600 font-bold text-sm">1</span>
+                  </div>
+                  <div>
+                    <p class="font-medium text-gray-900">Configure a integração UAZAPI</p>
+                    <p class="text-sm text-gray-500">Vá em <a href="integracoes.html" class="text-indigo-600 hover:underline">Integrações</a> e adicione seu token e URL do servidor UAZAPI.</p>
+                  </div>
+                </div>
+
+                <div class="flex gap-4">
+                  <div class="flex-shrink-0 w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
+                    <span class="text-indigo-600 font-bold text-sm">2</span>
+                  </div>
+                  <div>
+                    <p class="font-medium text-gray-900">Digite seu número</p>
+                    <p class="text-sm text-gray-500">Insira o número do WhatsApp que deseja conectar (com DDD).</p>
+                  </div>
+                </div>
+
+                <div class="flex gap-4">
+                  <div class="flex-shrink-0 w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
+                    <span class="text-indigo-600 font-bold text-sm">3</span>
+                  </div>
+                  <div>
+                    <p class="font-medium text-gray-900">Clique em "Conectar WhatsApp"</p>
+                    <p class="text-sm text-gray-500">Um QR Code será gerado para você escanear.</p>
+                  </div>
+                </div>
+
+                <div class="flex gap-4">
+                  <div class="flex-shrink-0 w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
+                    <span class="text-indigo-600 font-bold text-sm">4</span>
+                  </div>
+                  <div>
+                    <p class="font-medium text-gray-900">Abra o WhatsApp no celular</p>
+                    <p class="text-sm text-gray-500">Vá em Configurações > Dispositivos conectados > Conectar um dispositivo.</p>
+                  </div>
+                </div>
+
+                <div class="flex gap-4">
+                  <div class="flex-shrink-0 w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                    <i class="bi bi-check text-green-600"></i>
+                  </div>
+                  <div>
+                    <p class="font-medium text-gray-900">Pronto!</p>
+                    <p class="text-sm text-gray-500">Seu WhatsApp estará conectado e pronto para uso.</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Aviso -->
+              <div class="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+                <div class="flex items-start gap-2">
+                  <i class="bi bi-exclamation-triangle-fill text-amber-500 mt-0.5"></i>
+                  <div>
+                    <p class="text-sm font-medium text-amber-800">Importante</p>
+                    <p class="text-xs text-amber-700 mt-1">
+                      Mantenha seu celular conectado à internet. Se o celular ficar offline por muito tempo, a conexão será perdida.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="assets/api.js"></script>
+    <script src="assets/auth.js"></script>
+    <!-- Script do Controlador de Temas -->
+    <script src="assets/theme-controller.js"></script>
+    <script>
+      // Variáveis globais
+      let pollingInterval = null;
+      const WEBHOOK_BASE = 'https://auto.fabricaneural.ia.br/webhook';
+
+      // Autenticação e Menu
+      if (typeof checkAuth === 'function') { checkAuth(); }
+
+      document.getElementById('logout-button').addEventListener('click', () => {
+        if (typeof logout === 'function') { logout(); }
+      });
+
+      const hamburger = document.querySelector('.hamburger');
+      const sidebar = document.querySelector('.sidebar');
+      hamburger.addEventListener('click', () => { sidebar.classList.toggle('open'); });
+      document.addEventListener('click', event => {
+        if (!sidebar.contains(event.target) && !hamburger.contains(event.target)) {
+          sidebar.classList.remove('open');
+        }
+      });
+
+      // Formatar número de telefone
+      document.getElementById('whatsapp-number').addEventListener('input', function(e) {
+        this.value = this.value.replace(/\D/g, '');
+      });
+
+      // Mostrar loading
+      function showLoading(show, text = 'Carregando...') {
+        const loadingSection = document.getElementById('loading-section');
+        const loadingText = document.getElementById('loading-text');
+        const connectFormSection = document.getElementById('connect-form-section');
+        
+        if (show) {
+          loadingSection.classList.remove('hidden');
+          loadingText.textContent = text;
+          connectFormSection.classList.add('hidden');
+        } else {
+          loadingSection.classList.add('hidden');
+        }
+      }
+
+      // Mostrar feedback
+      function showFeedback(message, isSuccess) {
+        const section = document.getElementById('feedback-section');
+        const content = document.getElementById('feedback-content');
+        
+        section.classList.remove('hidden');
+        content.textContent = message;
+        
+        if (isSuccess) {
+          content.className = 'p-3 rounded-lg text-sm bg-green-100 text-green-700';
+        } else {
+          content.className = 'p-3 rounded-lg text-sm bg-red-100 text-red-700';
+        }
+
+        setTimeout(() => {
+          section.classList.add('hidden');
+        }, 5000);
+      }
+
+      // Atualizar UI com status (recebe dados completos da API)
+      function updateStatusUI(status, instanceData = null) {
+        const statusDot = document.getElementById('status-dot');
+        const statusText = document.getElementById('status-text');
+        const connectionInfo = document.getElementById('connection-info');
+        const connectedNumber = document.getElementById('connected-number');
+        const connectedProfileName = document.getElementById('connected-profile-name');
+        const connectedProfilePic = document.getElementById('connected-profile-pic');
+        const businessBadge = document.getElementById('business-badge');
+        const btnDisconnect = document.getElementById('btn-disconnect');
+        const btnRefresh = document.getElementById('btn-refresh');
+        const qrcodeSection = document.getElementById('qrcode-section');
+        const pairingCodeSection = document.getElementById('pairing-code-section');
+        const connectFormSection = document.getElementById('connect-form-section');
+
+        statusDot.className = 'status-dot';
+
+        switch(status) {
+          case 'connected':
+            statusDot.classList.add('connected');
+            statusText.textContent = 'Conectado';
+            statusText.className = 'text-sm font-medium text-green-600';
+            connectionInfo.classList.remove('hidden');
+            connectFormSection.classList.add('hidden');
+            
+            // Preencher dados do perfil
+            if (instanceData) {
+              // Número do WhatsApp
+              const phone = instanceData.owner || instanceData.phone || instanceData.numero;
+              if (phone) {
+                const formattedPhone = phone.replace(/^55/, '');
+                connectedNumber.textContent = `+55 ${formattedPhone}`;
+              }
+              
+              // Nome do perfil
+              const profileName = instanceData.profileName || instanceData.name || '';
+              if (profileName) {
+                connectedProfileName.textContent = profileName;
+              }
+              
+              // Foto do perfil
+              const profilePic = instanceData.profilePicUrl || instanceData.profilePic || '';
+              if (profilePic) {
+                connectedProfilePic.src = profilePic;
+                connectedProfilePic.classList.remove('hidden');
+              } else {
+                connectedProfilePic.src = '';
+                connectedProfilePic.classList.add('hidden');
+              }
+              
+              // Badge Business
+              if (instanceData.isBusiness) {
+                businessBadge.classList.remove('hidden');
+              } else {
+                businessBadge.classList.add('hidden');
+              }
+            }
+            
+            btnDisconnect.classList.remove('hidden');
+            btnRefresh.classList.remove('hidden');
+            qrcodeSection.classList.add('hidden');
+            pairingCodeSection.classList.add('hidden');
+            stopPolling();
+            break;
+
+          case 'connecting':
+            statusDot.classList.add('connecting');
+            statusText.textContent = 'Aguardando conexão...';
+            statusText.className = 'text-sm font-medium text-amber-600';
+            connectionInfo.classList.add('hidden');
+            connectFormSection.classList.add('hidden');
+            btnDisconnect.classList.add('hidden');
+            btnRefresh.classList.remove('hidden');
+            break;
+
+          case 'disconnected':
+          default:
+            statusDot.classList.add('disconnected');
+            statusText.textContent = 'Desconectado';
+            statusText.className = 'text-sm font-medium text-red-600';
+            connectionInfo.classList.add('hidden');
+            connectFormSection.classList.remove('hidden');
+            btnDisconnect.classList.add('hidden');
+            btnRefresh.classList.remove('hidden');
+            qrcodeSection.classList.add('hidden');
+            pairingCodeSection.classList.add('hidden');
+            stopPolling();
+            break;
+        }
+      }
+
+      // Verificar status da conexão
+      async function checkConnectionStatus() {
+        showLoading(true, 'Verificando status...');
+
+        try {
+          const jwtToken = localStorage.getItem('jwt_token');
+          
+          const response = await fetch(`${WEBHOOK_BASE}/canal-status`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${jwtToken}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({})
+          });
+
+          if (!response.ok) {
+            throw new Error('Erro ao verificar status');
+          }
+
+          const responseData = await response.json();
+          
+          // A API pode retornar array ou objeto
+          const data = Array.isArray(responseData) ? responseData[0] : responseData;
+          
+          // Extrair dados da instância e status
+          const instance = data.instance || data;
+          const statusInfo = data.status || {};
+          
+          const isConnected = statusInfo.connected || instance.status === 'connected' || data.connected;
+          
+          if (isConnected) {
+            updateStatusUI('connected', instance);
+          } else {
+            updateStatusUI('disconnected');
+          }
+        } catch (error) {
+          console.error('Erro ao verificar status:', error);
+          updateStatusUI('disconnected');
+        } finally {
+          showLoading(false);
+        }
+      }
+
+      // ========== CONECTAR COM QR CODE (sem número) ==========
+      async function connectWithQRCode() {
+        showLoading(true, 'Gerando QR Code...');
+        updateStatusUI('connecting');
+
+        try {
+          const jwtToken = localStorage.getItem('jwt_token');
+          
+          // Não envia o campo "phone" para gerar QR Code
+          const response = await fetch(`${WEBHOOK_BASE}/canal-conectar`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${jwtToken}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({})  // Sem número = QR Code
+          });
+
+          if (!response.ok) {
+            throw new Error('Erro ao gerar QR Code');
+          }
+
+          const data = await response.json();
+          showLoading(false);
+
+          if (data.qrcode || data.qr || data.base64) {
+            showQRCode(data.qrcode || data.qr || data.base64);
+            startPolling('qrcode');
+          } else if (data.connected) {
+            updateStatusUI('connected', data.phone || data.numero);
+            showFeedback('WhatsApp conectado com sucesso!', true);
+          } else if (data.error) {
+            throw new Error(data.error);
+          } else {
+            throw new Error('QR Code não recebido');
+          }
+        } catch (error) {
+          console.error('Erro ao conectar:', error);
+          showLoading(false);
+          showFeedback('Erro: ' + error.message, false);
+          updateStatusUI('disconnected');
+        }
+      }
+
+      // ========== CONECTAR COM CÓDIGO DE PAREAMENTO (com número) ==========
+      async function connectWithPairingCode() {
+        const phoneInput = document.getElementById('whatsapp-number');
+        const phone = phoneInput.value.trim();
+
+        // Validação do número
+        if (!phone || phone.length < 10 || phone.length > 11) {
+          showFeedback('Digite um número válido com DDD (10 ou 11 dígitos)', false);
+          phoneInput.focus();
+          return;
+        }
+
+        showLoading(true, 'Gerando código de pareamento...');
+        updateStatusUI('connecting');
+
+        try {
+          const jwtToken = localStorage.getItem('jwt_token');
+          
+          // Envia o campo "phone" para gerar código de pareamento
+          const response = await fetch(`${WEBHOOK_BASE}/canal-conectar`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${jwtToken}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              phone: `55${phone}`  // Com código do país
+            })
+          });
+
+          if (!response.ok) {
+            throw new Error('Erro ao gerar código de pareamento');
+          }
+
+          const data = await response.json();
+          showLoading(false);
+
+          if (data.pairingCode || data.pairing_code || data.code) {
+            showPairingCode(data.pairingCode || data.pairing_code || data.code);
+            startPolling('pairing');
+          } else if (data.connected) {
+            updateStatusUI('connected', phone);
+            showFeedback('WhatsApp conectado com sucesso!', true);
+          } else if (data.error) {
+            throw new Error(data.error);
+          } else {
+            throw new Error('Código de pareamento não recebido');
+          }
+        } catch (error) {
+          console.error('Erro ao conectar:', error);
+          showLoading(false);
+          showFeedback('Erro: ' + error.message, false);
+          updateStatusUI('disconnected');
+        }
+      }
+
+      // Mostrar QR Code
+      function showQRCode(qrData) {
+        const qrcodeSection = document.getElementById('qrcode-section');
+        const pairingCodeSection = document.getElementById('pairing-code-section');
+        const qrcodeImage = document.getElementById('qrcode-image');
+        
+        pairingCodeSection.classList.add('hidden');
+        
+        if (qrData.startsWith('data:image')) {
+          qrcodeImage.src = qrData;
+        } else {
+          qrcodeImage.src = `data:image/png;base64,${qrData}`;
+        }
+        
+        qrcodeSection.classList.remove('hidden');
+      }
+
+      // Mostrar código de pareamento
+      function showPairingCode(code) {
+        const qrcodeSection = document.getElementById('qrcode-section');
+        const pairingCodeSection = document.getElementById('pairing-code-section');
+        const pairingCodeDisplay = document.getElementById('pairing-code-display');
+        
+        qrcodeSection.classList.add('hidden');
+        
+        // Formatar código com hífen no meio (ex: 1234-5678)
+        const formattedCode = code.length === 8 
+          ? `${code.slice(0, 4)}-${code.slice(4)}` 
+          : code;
+        
+        pairingCodeDisplay.textContent = formattedCode;
+        pairingCodeSection.classList.remove('hidden');
+      }
+
+      // Iniciar polling para verificar conexão
+      function startPolling(type = 'qrcode') {
+        if (pollingInterval) {
+          clearInterval(pollingInterval);
+        }
+
+        let attempts = 0;
+        const maxAttempts = type === 'qrcode' ? 60 : 150; // 2 min para QR, 5 min para pareamento
+        const timerElement = type === 'qrcode' 
+          ? document.getElementById('qrcode-timer')
+          : document.getElementById('pairing-timer');
+
+        pollingInterval = setInterval(async () => {
+          attempts++;
+          
+          const remaining = Math.floor((maxAttempts - attempts) * 2);
+          const minutes = Math.floor(remaining / 60);
+          const seconds = remaining % 60;
+          
+          if (timerElement) {
+            timerElement.textContent = `Aguardando conexão... (${minutes}:${String(seconds).padStart(2, '0')})`;
+          }
+
+          if (attempts >= maxAttempts) {
+            stopPolling();
+            document.getElementById('qrcode-section').classList.add('hidden');
+            document.getElementById('pairing-code-section').classList.add('hidden');
+            updateStatusUI('disconnected');
+            showFeedback('Tempo esgotado. Tente novamente.', false);
+            return;
+          }
+
+          try {
+            const jwtToken = localStorage.getItem('jwt_token');
+            
+            const response = await fetch(`${WEBHOOK_BASE}/canal-status`, {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${jwtToken}`,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({})
+            });
+
+            const data = await response.json();
+
+            if (data.connected || data.status === 'connected') {
+              stopPolling();
+              updateStatusUI('connected', data.phone || data.numero);
+              showFeedback('WhatsApp conectado com sucesso!', true);
+            }
+          } catch (error) {
+            console.error('Erro no polling:', error);
+          }
+        }, 2000);
+      }
+
+      // Parar polling
+      function stopPolling() {
+        if (pollingInterval) {
+          clearInterval(pollingInterval);
+          pollingInterval = null;
+        }
+      }
+
+      // Desconectar WhatsApp
+      async function disconnectWhatsApp() {
+        if (!confirm('Tem certeza que deseja desconectar o WhatsApp?')) {
+          return;
+        }
+
+        showLoading(true, 'Desconectando...');
+
+        try {
+          const jwtToken = localStorage.getItem('jwt_token');
+          
+          const response = await fetch(`${WEBHOOK_BASE}/canal-desconectar`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${jwtToken}`
+            }
+          });
+
+          if (!response.ok) {
+            throw new Error('Erro ao desconectar');
+          }
+
+          updateStatusUI('disconnected');
+          showFeedback('WhatsApp desconectado com sucesso!', true);
+        } catch (error) {
+          console.error('Erro ao desconectar:', error);
+          showFeedback('Erro ao desconectar: ' + error.message, false);
+        } finally {
+          showLoading(false);
+        }
+      }
+
+      // Inicialização
+      document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(() => {
+          checkConnectionStatus();
+        }, 500);
+      });
+
+      // Limpar interval ao sair da página
+      window.addEventListener('beforeunload', () => {
+        stopPolling();
+      });
+    </script>
+  </body>
+</html>

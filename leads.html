@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="pt-br" class="h-full bg-gradient-to-br from-gray-50 to-gray-100">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Leads - Fabrica Neural CRM</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Biblioteca para exportar Excel -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <!-- CSS de Temas Dark/Light -->
+    <link rel="stylesheet" href="assets/themes.css">
+    <style>
+      /* Seu CSS existente (fontes, cards, sidebar, etc.) */
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+      body { font-family: 'Inter', sans-serif; height: 100vh; }
+      .card {
+        background: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(15px);
+        border-radius: 20px;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.07);
+      }
+      .sidebar {
+        background: linear-gradient(180deg, #111827 0%, #030712 100%);
+        border-right: 1px solid #1f2937;
+        transition: transform 0.3s ease-in-out;
+      }
+      .sidebar-item-active {
+        background-color: #4f46e5;
+        color: white;
+        box-shadow: 0 4px 10px rgba(79, 70, 229, 0.5);
+        border-radius: 12px;
+      }
+      .sidebar-link {
+        transition: all 0.2s;
+        border-radius: 12px;
+        padding: 12px 16px;
+        font-size: 0.95rem;
+      }
+      .sidebar-link:hover { background-color: #1f2937; color: #d1d5db; }
+      .hamburger { display: none; cursor: pointer; }
+      @media (max-width: 768px) {
+        .sidebar { position: fixed; transform: translateX(-100%); width: 260px; z-index: 50; height: 100vh; }
+        .sidebar.open { transform: translateX(0); }
+        .pl-72 { padding-left: 0 !important; }
+        .hamburger { display: block; }
+        header { 
+          height: 64px; 
+          padding: 0 12px !important;
+        }
+        header h2 { font-size: 1.25rem; }
+        .px-8 { padding-left: 12px !important; padding-right: 12px !important; }
+        
+        /* Corrigir layout mobile */
+        main { 
+          overflow-x: hidden; 
+          padding: 12px !important;
+        }
+        .p-10 { padding: 12px !important; }
+        
+        /* Filtros em coluna no mobile */
+        .grid-cols-1.md\:grid-cols-3 { 
+          grid-template-columns: 1fr !important; 
+        }
+        .md\:col-span-1, .md\:col-span-2 {
+          grid-column: span 1 !important;
+        }
+        .grid-cols-2 {
+          grid-template-columns: 1fr 1fr !important;
+        }
+        .gap-4 { gap: 8px !important; }
+        .mb-6 { margin-bottom: 12px !important; }
+        .mb-4 { margin-bottom: 8px !important; }
+        
+        /* Botão exportar */
+        .flex.justify-between.items-center {
+          flex-direction: column;
+          align-items: stretch;
+          gap: 8px;
+        }
+        #export-leads-btn {
+          width: 100%;
+          justify-content: center;
+        }
+        
+        /* Tabela responsiva */
+        .card {
+          border-radius: 12px;
+        }
+        table {
+          font-size: 0.75rem;
+        }
+        th, td {
+          padding: 8px 6px !important;
+        }
+        th:nth-child(3), td:nth-child(3),
+        th:nth-child(4), td:nth-child(4) {
+          display: none;
+        }
+        
+        /* Remover barra branca no final */
+        body, html {
+          overflow-x: hidden;
+          height: 100%;
+        }
+        .h-screen {
+          min-height: 100vh;
+          height: auto;
+        }
+        .flex-1.flex.flex-col {
+          min-height: 0;
+        }
+      }
+      #profile-image {
+        background-size: cover !important;
+        background-position: center !important;
+        background-repeat: no-repeat !important;
+        background-color: transparent !important;
+        transition: none !important;
+      }
+      #profile-image:focus,
+      #profile-image:hover,
+      .sidebar-item-active #profile-image {
+        background-color: transparent !important;
+      }
+
+      /* Estilo para o Toggle Switch do Bot */
+      .toggle-checkbox:checked {
+        right: 0;
+        border-color: #4f46e5;
+      }
+      .toggle-checkbox:checked + .toggle-label {
+        background-color: #4f46e5;
+      }
+
+      /* */
+      .modal-backdrop {
+        background-color: rgb(0, 0, 0);
+      }
+    </style>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    />
+  </head>
+  <body class="h-full">
+    <div class="flex h-screen">
+      <div class="fixed inset-y-0 z-50 w-72 sidebar text-white p-6 shadow-2xl">
+        
+        <div class="flex h-16 shrink-0 items-center min-h-[64px] overflow-hidden">
+            <div class="flex items-center gap-3">
+                <div id="profile-image" class="h-9 w-9 rounded-full bg-indigo-500 flex items-center justify-center text-xl font-bold flex-shrink-0 shadow-lg"></div>
+                <h1 id="sidebar-main-title" class="text-2xl font-extrabold text-white tracking-wider whitespace-nowrap overflow-hidden text-overflow-ellipsis"></h1>
+            </div>
+        </div>
+
+        <nav class="flex flex-1 flex-col overflow-y-auto mt-10">
+          <ul role="list" class="flex flex-1 flex-col gap-y-3">
+            <li>
+              <ul role="list" class="space-y-1">
+                <li>
+                  <a
+                    href="dashboard.html"
+                    class="text-gray-300 hover:text-white group flex items-center gap-x-3 text-sm leading-6 font-semibold transition-colors sidebar-link"
+                    ><i class="bi bi-speedometer2 text-lg"></i> Dashboard</a
+                  >
+                </li>
+                <li>
+                  <a
+                    href="leads.html"
+                    class="sidebar-item-active text-white group flex items-center gap-x-3 text-sm leading-6 font-semibold shadow-lg transition-colors sidebar-link"
+                    ><i class="bi bi-people-fill text-lg"></i> Leads</a
+                  >
+                </li>
+                <li>
+                  <a
+                    href="enviar_mensagem.html"
+                    class="text-gray-300 hover:text-white group flex items-center gap-x-3 text-sm leading-6 font-semibold transition-colors sidebar-link"
+                    ><i class="bi bi-whatsapp text-lg"></i> WhatsApp</a
+                  >
+                </li>
+                <li><a href="agendamentos.html" class="text-gray-300 hover:text-white group flex items-center gap-x-3 text-sm leading-6 font-semibold transition-colors sidebar-link"><i class="bi bi-calendar-check text-lg"></i> Agendamentos</a></li>
+                <li>
+                  <a
+                    href="etiquetas.html"
+                    class="text-gray-300 hover:text-white group flex items-center gap-x-3 text-sm leading-6 font-semibold transition-colors sidebar-link"
+                    ><i class="bi bi-tags-fill text-lg"></i> Etiquetas</a
+                  >
+                </li>
+                <li>
+                  <a
+                    href="rastreamento.html"
+                    class="text-gray-300 hover:text-white group flex items-center gap-x-3 text-sm leading-6 font-semibold transition-colors sidebar-link"
+                    ><i class="bi bi-signpost-split text-lg"></i> Rastreamento</a
+                  >
+                </li>
+                <li>
+                  <a
+                    href="canais.html"
+                    class="text-gray-300 hover:text-white group flex items-center gap-x-3 text-sm leading-6 font-semibold transition-colors sidebar-link"
+                    ><i class="bi bi-broadcast text-lg"></i> Canais</a
+                  >
+                </li>
+                <li>
+                  <a
+                    href="integracoes.html"
+                    class="text-gray-300 hover:text-white group flex items-center gap-x-3 text-sm leading-6 font-semibold transition-colors sidebar-link"
+                    ><i class="bi bi-plug text-lg"></i> Integrações</a
+                  >
+                </li>
+              </ul>
+            </li>
+            <li class="mt-auto">
+              <ul role="list" class="space-y-1 pt-6 border-t border-gray-700">
+                <li>
+                  <a
+                    href="minha-conta.html"
+                    class="text-gray-300 hover:text-white group flex items-center gap-x-3 text-sm leading-6 font-semibold transition-colors sidebar-link"
+                    ><i class="bi bi-person-circle text-lg"></i> Minha Conta</a
+                  >
+                </li>
+                <li>
+                  <button
+                    id="logout-button"
+                    class="w-full text-left text-gray-300 hover:text-white group flex items-center gap-x-3 text-sm leading-6 font-semibold transition-colors sidebar-link"
+                  >
+                    <i class="bi bi-box-arrow-right text-lg"></i> Sair
+                  </button>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+      </div>
+
+      <div class="pl-72 h-full flex flex-col overflow-hidden w-full">
+        <header
+          class="sticky top-0 z-40 flex h-20 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white/95 px-8 shadow-md backdrop-blur-sm"
+        >
+          <button class="hamburger p-2">
+            <i class="bi bi-list text-2xl text-gray-700"></i>
+          </button>
+          <h2 class="text-2xl font-bold text-gray-900">Gestão de Leads</h2>
+        </header>
+
+        <main class="flex-1 flex flex-col p-10 overflow-hidden">
+          
+          <div class="flex-shrink-0">
+            <div class="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+              <div class="md:col-span-1">
+                <label for="search-leads" class="block text-sm font-medium text-gray-700">Buscar por palavra-chave</label>
+                <div class="relative mt-1 rounded-md shadow-sm">
+                  <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                    <i class="bi bi-search text-gray-400"></i>
+                  </div>
+                  <input
+                    type="text"
+                    id="search-leads"
+                    class="block w-full rounded-md border-gray-300 pl-10 py-3 text-base focus:border-indigo-500 focus:ring-indigo-500"
+                    placeholder="Nome, telefone, campanha..."
+                  />
+                </div>
+              </div>
+              
+              <div class="md:col-span-2 grid grid-cols-2 gap-4">
+                <div>
+                  <label for="date-start" class="block text-sm font-medium text-gray-700">Lead entrou de:</label>
+                  <input
+                    type="date"
+                    id="date-start"
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-3 px-3 focus:border-indigo-500 focus:ring-indigo-500"
+                  />
+                </div>
+                <div>
+                  <label for="date-end" class="block text-sm font-medium text-gray-700">Até:</label>
+                  <input
+                    type="date"
+                    id="date-end"
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-3 px-3 focus:border-indigo-500 focus:ring-indigo-500"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div class="mb-4 flex justify-between items-center">
+              <p id="leads-count-display" class="text-sm text-gray-600">Carregando leads...</p>
+              <button
+                id="export-leads-btn"
+                class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-md shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
+              >
+                <i class="bi bi-file-earmark-excel"></i>
+                Exportar para Excel
+              </button>
+            </div>
+          </div> 
+          <div class="card overflow-y-auto overflow-x-auto shadow ring-1 ring-black ring-opacity-5 flex-1">
+            <table class="min-w-full divide-y divide-gray-200">
+              
+              <thead class="bg-gray-50 sticky top-0 z-10">
+                <tr>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nome</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contato</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Etiqueta</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Criado em</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Bot Ativo</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                </tr>
+              </thead>
+              <tbody id="leads-table-body" class="bg-white divide-y divide-gray-200">
+                <tr id="loading-row">
+                  <td colspan="6" class="px-6 py-4 text-center text-gray-500">
+                    Carregando leads...
+                  </td>
+                </tr>
+                </tbody>
+            </table>
+          </div>
+          </main>
+      </div>
+    </div>
+
+    <!-- Modal de Visualização Detalhada do Lead -->
+    <div id="view-lead-modal" class="fixed inset-0 z-50 flex items-center justify-center overflow-auto hidden">
+      <div class="fixed inset-0 modal-backdrop transition-opacity"></div>
+      <div class="bg-white rounded-lg shadow-xl p-6 m-4 max-w-2xl w-full z-10">
+        <!-- Header com título e botão fechar -->
+        <div class="flex items-center justify-between mb-6">
+          <h3 class="text-lg font-medium leading-6 text-gray-900">Detalhes do Lead</h3>
+          <button type="button" id="view-modal-close" class="text-gray-400 hover:text-gray-600 transition-colors">
+            <i class="bi bi-x-lg text-xl"></i>
+          </button>
+        </div>
+        
+        <!-- Conteúdo do modal -->
+        <div class="space-y-6">
+          <!-- Grid 2 colunas -->
+          <div class="grid grid-cols-2 gap-6">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Nome</label>
+              <p id="view-nome" class="text-base text-gray-900">-</p>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Contato</label>
+              <p id="view-contato" class="text-base text-gray-900">-</p>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Etiqueta</label>
+              <p id="view-etiqueta" class="text-base text-gray-900">-</p>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Criado em</label>
+              <p id="view-criadoem" class="text-base text-gray-900">-</p>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Campanha</label>
+              <p id="view-campanha" class="text-base text-gray-900">-</p>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Encaminhamento</label>
+              <p id="view-encaminhamento" class="text-base text-gray-900">-</p>
+            </div>
+          </div>
+
+          <!-- Resumo em coluna cheia -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Resumo</label>
+            <p id="view-resumo" class="text-base text-gray-900 whitespace-pre-wrap">-</p>
+          </div>
+
+          <!-- Última Interação em coluna cheia -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Última Interação</label>
+            <p id="view-ultimainteracao" class="text-base text-gray-900">-</p>
+          </div>
+
+          <!-- Bot Ativado -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-3">Bot Ativado</label>
+            <div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+              <input type="checkbox" id="view-toggle-bot" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
+              <label for="view-toggle-bot" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Botões -->
+        <div class="flex justify-end gap-3 pt-6 border-t border-gray-200">
+          <button type="button" id="view-modal-edit-btn" class="px-5 py-2.5 bg-indigo-600 text-white border border-transparent rounded-lg hover:bg-indigo-700 transition-colors font-medium shadow-sm">
+            <i class="bi bi-pencil-square mr-2"></i>Editar Lead
+          </button>
+          <button type="button" id="view-modal-close-btn" class="px-5 py-2.5 bg-gray-100 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-200 transition-colors font-medium">
+            <i class="bi bi-x-circle mr-2"></i>Fechar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="edit-lead-modal" class="fixed inset-0 z-50 flex items-center justify-center overflow-auto hidden">
+      <div class="fixed inset-0 modal-backdrop transition-opacity"></div>
+      <div class="bg-white rounded-lg shadow-xl p-6 m-4 max-w-lg w-full z-10">
+        <!-- Header com título e botão fechar -->
+        <div class="flex items-center justify-between mb-6">
+          <h3 class="text-lg font-medium leading-6 text-gray-900">Editar Lead</h3>
+          <button type="button" id="modal-close-x" class="text-gray-400 hover:text-gray-600 transition-colors">
+            <i class="bi bi-x-lg text-xl"></i>
+          </button>
+        </div>
+        
+        <form id="edit-lead-form">
+          <input type="hidden" id="edit-lead-id">
+          
+          <div class="mb-4">
+            <label for="edit-nome" class="block text-sm font-medium text-gray-700 mb-1">Nome</label>
+            <input type="text" id="edit-nome" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2 px-3">
+          </div>
+          
+          <div class="mb-4">
+            <label for="edit-contato" class="block text-sm font-medium text-gray-700 mb-1">Número WhatsApp</label>
+            <input type="text" id="edit-contato" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2 px-3">
+          </div>
+          
+          <div class="mb-6">
+            <label for="edit-campanha" class="block text-sm font-medium text-gray-700 mb-1">Campanha</label>
+            <input type="text" id="edit-campanha" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2 px-3">
+          </div>
+          
+          <!-- Botões com espaçamento adequado -->
+          <div class="flex justify-between gap-3 pt-4 border-t border-gray-200">
+            <button type="button" id="modal-cancel-button" class="flex-1 px-5 py-2.5 bg-gray-100 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-200 transition-colors font-medium">
+              <i class="bi bi-x-circle mr-2"></i>Fechar
+            </button>
+            <button type="submit" id="modal-save-button" class="flex-1 px-5 py-2.5 bg-indigo-600 text-white border border-transparent rounded-lg hover:bg-indigo-700 transition-colors font-medium shadow-sm">
+              <i class="bi bi-check-circle mr-2"></i>Salvar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal de Confirmação de Exclusão -->
+    <div id="delete-lead-modal" class="fixed inset-0 z-50 flex items-center justify-center overflow-auto hidden">
+      <div class="fixed inset-0 modal-backdrop transition-opacity"></div>
+      <div class="bg-white rounded-lg shadow-xl p-6 m-4 max-w-md w-full z-10">
+        <!-- Ícone de alerta -->
+        <div class="flex justify-center mb-4">
+          <div class="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center">
+            <i class="bi bi-exclamation-triangle-fill text-3xl text-red-600"></i>
+          </div>
+        </div>
+        
+        <!-- Título -->
+        <h3 class="text-xl font-bold text-center text-gray-900 mb-2">Excluir Lead</h3>
+        
+        <!-- Nome do lead -->
+        <p class="text-center text-gray-600 mb-4">
+          Você está prestes a excluir o lead:<br>
+          <strong id="delete-lead-name" class="text-gray-900">Nome do Lead</strong>
+        </p>
+        
+        <!-- Aviso importante -->
+        <div class="bg-amber-50 border-l-4 border-amber-400 p-4 mb-6 rounded-r-lg">
+          <div class="flex items-start">
+            <i class="bi bi-exclamation-circle-fill text-amber-500 text-lg mr-3 mt-0.5"></i>
+            <div>
+              <p class="text-sm font-semibold text-amber-800">Atenção!</p>
+              <p class="text-sm text-amber-700 mt-1">
+                Esta ação irá excluir <strong>permanentemente</strong> o lead e <strong>todas as mensagens do WhatsApp</strong> associadas a ele.
+              </p>
+              <p class="text-sm text-amber-700 mt-2 font-medium">
+                Esta ação não pode ser desfeita!
+              </p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Botões -->
+        <div class="flex gap-3">
+          <button type="button" id="delete-cancel-button" class="flex-1 px-5 py-2.5 bg-gray-100 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-200 transition-colors font-medium">
+            <i class="bi bi-x-circle mr-2"></i>Cancelar
+          </button>
+          <button type="button" id="delete-confirm-button" class="flex-1 px-5 py-2.5 bg-red-600 text-white border border-transparent rounded-lg hover:bg-red-700 transition-colors font-medium shadow-sm">
+            <i class="bi bi-trash mr-2"></i>Excluir
+          </button>
+        </div>
+        
+        <!-- Input hidden para guardar o ID -->
+        <input type="hidden" id="delete-lead-id">
+      </div>
+    </div>
+
+    <script src="assets/api.js"></script>
+    <script src="assets/auth.js"></script>
+    <script src="assets/global_ui.js"></script>
+    <script src="assets/leads.js"></script>
+    <script>
+      // Scripts (Sem Alterações)
+      if (typeof checkAuth === 'function') { checkAuth() } 
+
+      document.getElementById('logout-button').addEventListener('click', () => {
+        if (typeof logout === 'function') { logout() }
+      })
+      const hamburger = document.querySelector('.hamburger')
+      const sidebar = document.querySelector('.sidebar')
+      hamburger.addEventListener('click', () => { sidebar.classList.toggle('open') })
+      document.addEventListener('click', event => {
+        if (!sidebar.contains(event.target) && !hamburger.contains(event.target)) {
+          sidebar.classList.remove('open')
+        }
+      })
+    </script>
+  </body>
+</html>

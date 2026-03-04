@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="pt-br" class="h-full bg-gradient-to-br from-gray-50 to-gray-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>WhatsApp - Fabrica Neural CRM</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- CSS de Temas Dark/Light -->
+    <link rel="stylesheet" href="assets/themes.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    
+    <style>
+        /* Estilos base do Dashboard */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        body { 
+            font-family: 'Inter', sans-serif; 
+            height: 100vh;
+        }
+
+        /* Estilos do Glassy Card (Formulário) */
+        .card {
+            background: rgba(255, 255, 255, 0.98); 
+            backdrop-filter: blur(10px); 
+            border-radius: 20px; 
+            transition: transform 0.3s, box-shadow 0.3s;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.07); 
+        }
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1); 
+        }
+        
+        /* Estilos da Sidebar (Dashboard Theme) */
+        .sidebar {
+            background: linear-gradient(180deg, #111827 0%, #030712 100%);
+            border-right: 1px solid #1f2937;
+            transition: transform 0.3s ease-in-out;
+        }
+        .sidebar-item-active {
+            background-color: #4f46e5; /* indigo-600 */
+            color: white;
+            box-shadow: 0 4px 10px rgba(79, 70, 229, 0.5);
+            border-radius: 12px;
+        }
+        .sidebar-link {
+            transition: all 0.2s;
+            border-radius: 12px;
+            padding: 12px 16px;
+            font-size: 0.95rem;
+        }
+        .sidebar-link:hover {
+            background-color: #1f2937;
+            color: #d1d5db;
+        }
+        
+        /* Estilo para o botão de envio */
+        #send-message-form button[type="submit"] {
+            transition: background-color 0.2s, box-shadow 0.2s;
+        }
+
+        /* Estilos de badge simples, ajustados para Tailwind */
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            font-size: 11px;
+            font-weight: 700;
+            border-radius: 9999px; 
+            text-transform: uppercase;
+        }
+        .status-badge-success { background-color: #a7f3d0; color: #065f46; } /* green-200 / green-800 */
+
+        /* Hamburger Menu Button */
+        .hamburger {
+            display: none;
+            cursor: pointer;
+        }
+
+        /* Iframe Wrapper */
+        .iframe-container {
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+        }
+
+        /* Mobile Message */
+        .mobile-message {
+            display: none; /* Hidden by default */
+            text-align: center;
+            padding: 20px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #374151; /* gray-700 */
+        }
+
+        /* NOVO: layout tipo WhatsApp mobile */
+        .mobile-whatsapp-wrapper {
+            display: none;
+            height: calc(100vh - 64px);
+        }
+        .mobile-conversations,
+        .mobile-chat {
+            height: 100%;
+        }
+        .mobile-conversations {
+            overflow-y: auto;
+        }
+        .mobile-chat {
+            display: none;
+            flex-direction: column;
+        }
+        .mobile-chat-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            background: #0f172a;
+            color: #f9fafb;
+        }
+        .mobile-back-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 999px;
+            background: rgba(15,23,42,0.6);
+        }
+        .mobile-chat-body {
+            flex: 1;
+            overflow-y: auto;
+        }
+        .mobile-chat-input {
+            padding: 8px;
+        }
+
+        /* Botão Voltar - Mobile */
+        .back-button {
+            display: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: transparent;
+            border: none;
+            color: var(--cor-texto-primario);
+            font-size: 18px;
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+            margin-right: 8px;
+            transition: background 0.2s;
+        }
+        .back-button:hover {
+            background: rgba(0,0,0,0.05);
+        }
+
+        /* Media Query para Mobile (até 768px) */
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                transform: translateX(-100%);
+                width: 260px;
+                z-index: 50;
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            .pl-72 {
+                padding-left: 0 !important;
+            }
+            .card {
+                padding: 15px;
+                width: 95%;
+                margin-left: auto;
+                margin-right: auto;
+            }
+            .hamburger {
+                display: block;
+            }
+            header {
+                height: 64px;
+                padding: 0 10px;
+            }
+            h1.text-4xl {
+                font-size: 1.75rem;
+            }
+            p.text-lg {
+                font-size: 1rem;
+            }
+            .text-2xl {
+                font-size: 1.5rem;
+            }
+            select, textarea {
+                font-size: 0.875rem;
+                padding: 10px;
+                width: 100%;
+                max-width: 100%;
+                min-width: 0;
+            }
+            #send-message-form button[type="submit"] {
+                font-size: 1rem;
+                padding: 10px 20px;
+                width: 100%;
+                max-width: 100%;
+                min-width: 0;
+            }
+            .space-y-6 {
+                space-y-5 !important;
+            }
+            .mb-10 {
+                margin-bottom: 8px !important;
+            }
+            .max-w-3xl {
+                max-width: 100% !important;
+                width: 100%;
+                padding: 0 10px;
+            }
+            .card p {
+                font-size: 0.875rem;
+            }
+            /* Substituir iframe por layout tipo app */
+            .iframe-container {
+                display: none;
+            }
+            .mobile-message {
+                display: none;
+            }
+            .mobile-whatsapp-wrapper {
+                display: flex;
+                flex-direction: column;
+            }
+            
+            /* WhatsApp Mobile Layout */
+            .whatsapp-container {
+                flex-direction: column;
+                position: relative;
+            }
+            .leads-panel {
+                width: 100% !important;
+                max-width: 100% !important;
+                height: 100%;
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                z-index: 10;
+                transition: transform 0.3s ease;
+                border-right: none;
+            }
+            .leads-panel.hidden {
+                transform: translateX(-100%);
+            }
+            .chat-panel {
+                width: 100%;
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                z-index: 5;
+                transform: translateX(100%);
+                transition: transform 0.3s ease;
+            }
+            .chat-panel.active {
+                transform: translateX(0);
+                z-index: 15;
+            }
+            .back-button {
+                display: flex;
+            }
+            .bot-toggle-label {
+                display: none;
+            }
+            .bot-toggle-container {
+                padding-right: 0;
+            }
+            /* Ajustar a busca no mobile */
+            .search-container {
+                margin-left: 8px;
+            }
+            .leads-header {
+                padding: 10px 12px;
+            }
+            .lead-item {
+                padding: 12px;
+            }
+            .msg-preview {
+                max-width: 200px;
+            }
+        }
+        #profile-image {
+            background-size: cover !important;
+            background-position: center !important;
+            background-repeat: no-repeat !important;
+            background-color: transparent !important;
+            transition: none !important;
+        }
+
+        #profile-image:focus,
+        #profile-image:hover,
+        .sidebar-item-active #profile-image {
+            background-color: transparent !important;
+        }
+
+        /* WhatsApp Styles */
+        :root {
+            --cor-fundo: #f0f2f5;
+            --cor-fundo-chat: #e5ddd5;
+            --cor-painel-esq: #ffffff;
+            --cor-header: #00a884;
+            --cor-header-chat: #f0f2f5;
+            --cor-borda: #e9edef;
+            --cor-texto-primario: #111b21;
+            --cor-texto-secundario: #54656f;
+            --cor-msg-agente: #d9fdd3;
+            --cor-msg-cliente: #ffffff;
+            --cor-msg-ia: #d1f0ff;
+            --cor-lead-ativo: #f5f5f5;
+            --cor-icone: #54656f;
+        }
+
+        /* Toggle Switch do Bot */
+        .bot-toggle-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-left: auto;
+            padding-right: 10px;
+        }
+
+        .bot-toggle-label {
+            font-size: 13px;
+            color: var(--cor-texto-secundario);
+            font-weight: 500;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.3s;
+            border-radius: 24px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background-color: var(--cor-header);
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(20px);
+        }
+
+        input:disabled + .toggle-slider {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        #whatsapp-custom {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .whatsapp-container { 
+            display: flex; 
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            overflow: hidden;
+        }
+
+        /* Painel de Leads */
+        .leads-panel { 
+            width: 35%; 
+            max-width: 450px; 
+            background-color: var(--cor-painel-esq); 
+            border-right: 1px solid var(--cor-borda); 
+            display: flex; 
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .leads-header { 
+            padding: 10px 16px; 
+            background-color: var(--cor-header-chat); 
+            border-bottom: 1px solid var(--cor-borda); 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+
+        .nova-conversa-btn {
+            background-color: var(--cor-header);
+            color: white;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+            margin-right: 8px;
+            flex-shrink: 0;
+        }
+
+        .nova-conversa-btn:hover {
+            background-color: #008f6f;
+        }
+
+        .search-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            background-color: var(--cor-fundo);
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin-left: 10px;
+            position: relative;
+        }
+
+        .search-container i {
+            color: var(--cor-icone);
+            margin-right: 10px;
+            font-size: 16px;
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .search-container input {
+            flex: 1;
+            border: none;
+            outline: none;
+            background-color: transparent;
+            font-size: 14px;
+            color: var(--cor-texto-primario);
+            padding-left: 28px;
+            width: 100%;
+        }
+
+        .leads-list { 
+            flex: 1; 
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .lead-item { 
+            display: flex; 
+            align-items: center; 
+            padding: 12px 16px; 
+            border-bottom: 1px solid var(--cor-borda); 
+            cursor: pointer; 
+            transition: background-color 0.2s; 
+        }
+        .lead-item:hover, .lead-item.active { background-color: var(--cor-lead-ativo); }
+
+        .lead-avatar, #chatAvatar { 
+            width: 40px; 
+            height: 40px; 
+            border-radius: 50%; 
+            background-color: var(--cor-icone); 
+            background-position: center; 
+            background-repeat: no-repeat; 
+            background-size: cover; 
+            color: white; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-weight: 500; 
+            font-size: 18px; 
+            margin-right: 15px; 
+        }
+        #chatAvatar { cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
+        #chatAvatar:hover { transform: scale(1.1); box-shadow: 0 0 0 2px var(--cor-header); }
+
+        .lead-info { flex: 1; overflow: hidden; }
+        .lead-nome { font-weight: 500; margin-bottom: 4px; color: var(--cor-texto-primario); }
+        .lead-ultima-mensagem { display: flex; justify-content: space-between; align-items: center; font-size: 14px; color: var(--cor-texto-secundario); }
+        .msg-preview { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px; display: flex; align-items: center; }
+        .lead-horario { font-size: 12px; margin-left: 8px; white-space: nowrap; color: #667781; }
+
+        /* Painel de Chat */
+        .chat-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--cor-fundo-chat);
+            height: 100%;
+        }
+
+        .chat-header { 
+            padding: 10px 16px; 
+            background-color: var(--cor-header-chat); 
+            color: var(--cor-texto-primario); 
+            display: flex; 
+            align-items: center; 
+            border-bottom: 1px solid var(--cor-borda);
+            flex-shrink: 0;
+            height: 60px;
+        }
+
+        .chat-header-info {
+            flex: 1;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            background-color: var(--cor-fundo-chat);
+        }
+
+        .chat-input {
+            padding: 12px 16px;
+            background-color: var(--cor-header-chat);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-top: 1px solid var(--cor-borda);
+            flex-shrink: 0;
+            min-height: 62px;
+        }
+
+        .chat-input input { 
+            flex: 1; 
+            padding: 10px 16px; 
+            border: none; 
+            background-color: var(--cor-painel-esq); 
+            border-radius: 8px; 
+            font-size: 15px; 
+            outline: none; 
+            color: var(--cor-texto-primario);
+            height: 42px;
+        }
+        .chat-input input:disabled { 
+            background-color: var(--cor-borda); 
+        }
+        .chat-input button { 
+            background-color: var(--cor-header);
+            color: white;
+            border: none; 
+            font-size: 20px; 
+            width: 42px;
+            height: 42px;
+            border-radius: 50%; 
+            cursor: pointer; 
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .chat-input button:hover { 
+            background-color: #008f6f;
+        }
+        .chat-input button:disabled { 
+            background-color: #ccc;
+            color: #888; 
+            cursor: not-allowed; 
+        }
+
+        .message { 
+            max-width: 65%; 
+            padding: 8px 12px; 
+            padding-bottom: 18px;
+            margin-bottom: 10px; 
+            border-radius: 7.5px; 
+            position: relative; 
+            font-size: 14.5px; 
+            line-height: 1.4; 
+            box-shadow: 0 1px 1px rgba(0,0,0,0.05); 
+        }
+        .message.cliente { 
+            background-color: var(--cor-msg-cliente); 
+            align-self: flex-start; 
+            margin-right: auto; 
+        }
+        .message.agente { 
+            background-color: var(--cor-msg-agente); 
+            align-self: flex-end; 
+            margin-left: auto; 
+        }
+        .message.ia { 
+            background-color: var(--cor-msg-ia); 
+            align-self: flex-end; 
+            margin-left: auto; 
+        }
+
+        /* Horário da mensagem - estilo WhatsApp */
+        .message-time {
+            position: absolute;
+            bottom: 4px;
+            right: 8px;
+            font-size: 11px;
+            color: rgba(0,0,0,0.45);
+            white-space: nowrap;
+        }
+        .message.agente .message-time,
+        .message.ia .message-time {
+            color: rgba(0,0,0,0.45);
+        }
+
+        .message.media { 
+            padding: 4px; 
+            padding-bottom: 4px;
+            background-color: var(--cor-msg-cliente); 
+            box-shadow: 0 1px 1px rgba(0,0,0,0.05); 
+            max-width: 350px; 
+        }
+        .message.media.agente,
+        .message.media.ia {
+            background-color: var(--cor-msg-agente);
+        }
+        .message.media .message-time {
+            position: relative;
+            display: block;
+            text-align: right;
+            padding: 4px 4px 2px;
+            bottom: auto;
+            right: auto;
+        }
+
+        .chat-image { width: 280px; max-width: 100%; border-radius: 6px; display: block; cursor: zoom-in; transition: transform 0.2s; }
+        .chat-image:hover { transform: scale(1.02); }
+        
+        /* WhatsApp Audio Player Styles */
+        .audio-player {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px;
+            max-width: 280px;
+            min-width: 250px;
+        }
+        
+        .audio-play-btn {
+            width: 42px;
+            height: 42px;
+            min-width: 42px;
+            border-radius: 50%;
+            background-color: #00a884;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+            flex-shrink: 0;
+        }
+        
+        .audio-play-btn:hover {
+            background-color: #008f6f;
+        }
+        
+        .audio-play-btn i {
+            color: white;
+            font-size: 16px;
+            margin-left: 2px;
+        }
+        
+        .audio-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            min-width: 0;
+        }
+        
+        .audio-waveform {
+            height: 24px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .audio-progress-container {
+            width: 100%;
+            height: 4px;
+            background-color: rgba(0, 0, 0, 0.1);
+            border-radius: 2px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .audio-progress {
+            height: 100%;
+            background-color: #00a884;
+            border-radius: 2px;
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+        
+        .message.cliente .audio-progress {
+            background-color: #667781;
+        }
+        
+        .audio-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .audio-time {
+            font-size: 11px;
+            color: rgba(0, 0, 0, 0.45);
+            font-weight: 400;
+            white-space: nowrap;
+        }
+        
+        .audio-speed-btn {
+            font-size: 11px;
+            color: rgba(0, 0, 0, 0.45);
+            cursor: pointer;
+            padding: 2px 6px;
+            border-radius: 10px;
+            transition: background-color 0.2s;
+            user-select: none;
+            white-space: nowrap;
+            background: transparent;
+            border: none;
+            font-weight: 500;
+        }
+        
+        .audio-speed-btn:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+        
+        .audio-speed-btn.active {
+            color: #00a884;
+            background-color: rgba(0, 168, 132, 0.1);
+        }
+
+        .chat-document { display: flex; align-items: center; padding: 10px; background-color: var(--cor-fundo); border-radius: 7.5px; text-decoration: none; color: var(--cor-texto-primario); border: 1px solid var(--cor-borda); min-width: 220px; }
+
+        /* Modais */
+        .modal, .modal-imagem, .modal-nova-conversa { display: none; position: fixed; z-index: 1001; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.4); align-items: center; justify-content: center; }
+        .modal-content, .modal-nova-content { background-color: white; border-radius: 12px; width: 90%; max-width: 420px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); overflow: hidden; }
+        .modal-header, .modal-nova-header { padding: 16px 20px; background-color: var(--cor-header); color: white; display: flex; justify-content: space-between; align-items: center; }
+        .modal-body, .modal-nova-body { padding: 20px; }
+        .modal-body input, .modal-nova-body input, .modal-nova-body textarea { width: 100%; padding: 12px; border: 1px solid var(--cor-borda); border-radius: 8px; font-size: 14px; outline: none; margin-bottom: 12px; }
+        .modal-body input:focus, .modal-nova-body input:focus, .modal-nova-body textarea:focus { border-color: var(--cor-header); }
+        .modal-footer, .modal-nova-footer { padding: 16px 20px; text-align: right; background-color: #f8f9fa; }
+        .modal-footer button, .btn-enviar-nova { background-color: var(--cor-header); color: white; border: none; padding: 10px 24px; border-radius: 8px; cursor: pointer; font-weight: 500; display: inline-flex; align-items: center; gap: 8px; }
+        .modal-footer button:hover, .btn-enviar-nova:hover { background-color: #008f6f; }
+
+        .modal-imagem img { max-width: 90%; max-height: 90%; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+        .fechar-imagem { position: absolute; top: 20px; right: 30px; color: white; font-size: 40px; font-weight: bold; cursor: pointer; }
+        .close { cursor: pointer; font-size: 28px; font-weight: bold; color: white; }
+        .close:hover { color: #ddd; }
+
+        /* Loading */
+        .chatwoot-loading-full {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            color: #1e293b;
+            font-size: 16px;
+            z-index: 100;
+        }
+        .chatwoot-loading-full i {
+            font-size: 36px;
+            color: #25d366;
+            animation: pulse 1.8s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(0.9); opacity: 0.7; }
+            50% { transform: scale(1.1); opacity: 1; }
+        }
+
+        /* Estilos das Etiquetas */
+        .lead-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            margin-top: 4px;
+        }
+
+        .tag-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 500;
+            color: white;
+        }
+
+        .tags-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: transparent;
+            border: none;
+            color: var(--cor-texto-secundario);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+            margin-left: 8px;
+        }
+
+        .tags-btn:hover {
+            background: rgba(0,0,0,0.05);
+        }
+
+        .tags-btn i {
+            font-size: 18px;
+        }
+
+        .modal-tags {
+            display: none;
+            position: fixed;
+            z-index: 1001;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.4);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-tags-content {
+            background-color: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 480px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+
+        .modal-tags-header {
+            padding: 16px 20px;
+            background-color: var(--cor-header);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 12px 12px 0 0;
+        }
+
+        .modal-tags-body {
+            padding: 20px;
+        }
+
+        .tags-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .tag-option {
+            padding: 8px 12px;
+            border-radius: 16px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            color: white;
+        }
+
+        .tag-option:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .tag-option.selected {
+            border-color: #1f2937;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.3);
+        }
+
+        .tag-option i {
+            font-size: 14px;
+        }
+
+        .no-tags-message {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+
+        .no-tags-message i {
+            font-size: 48px;
+            margin-bottom: 12px;
+            color: #ddd;
+        }
+    </style>
+</head>
+<body class="h-full">
+    <script src="assets/api.js"></script>
+    <script src="assets/auth.js"></script>
+    <script>checkAuth(); /* Redireciona para /login.html se não houver token */</script>
+
+    <div class="flex h-screen">
+        <div class="fixed inset-y-0 z-50 w-72 sidebar text-white p-6 shadow-2xl">
+            <div class="flex h-16 shrink-0 items-center min-h-[64px] overflow-hidden">
+                <div class="flex items-center gap-3">
+                    <div id="profile-image" class="h-9 w-9 rounded-full bg-indigo-500 flex items-center justify-center text-xl font-bold flex-shrink-0 shadow-lg"></div>
+                    <h1 id="sidebar-main-title" class="text-2xl font-extrabold text-white tracking-wider whitespace-nowrap overflow-hidden text-overflow-ellipsis"></h1>
+                </div>
+            </div>
+            <nav class="flex flex-1 flex-col overflow-y-auto mt-10">
+                <ul role="list" class="flex flex-1 flex-col gap-y-3">
+                    <li>
+                        <ul role="list" class="space-y-1">
+                            <li><a href="dashboard.html" class="text-gray-300 hover:text-white group flex items-center gap-x-3 text-sm leading-6 font-semibold transition-colors sidebar-link"><i class="bi bi-speedometer2 text-lg"></i> Dashboard</a></li>
+                            <li><a href="leads.html" class="text-gray-300 hover:text-white group flex items-center gap-x-3 text-sm leading-6 font-semibold transition-colors sidebar-link"><i class="bi bi-kanban text-lg"></i> Leads</a></li>
+                            <li><a href="enviar_mensagem.html" class="sidebar-item-active text-white group flex items-center gap-x-3 text-sm leading-6 font-semibold shadow-lg transition-colors sidebar-link"><i class="bi bi-whatsapp text-lg"></i> WhatsApp</a></li>
+                            <li><a href="agendamentos.html" class="text-gray-300 hover:text-white group flex items-center gap-x-3 text-sm leading-6 font-semibold transition-colors sidebar-link"><i class="bi bi-calendar-check text-lg"></i> Agendamentos</a></li>
+                            <li><a href="etiquetas.html" class="text-gray-300 hover:text-white group flex items-center gap-x-3 text-sm leading-6 font-semibold transition-colors sidebar-link"><i class="bi bi-tags-fill text-lg"></i> Etiquetas</a></li>
+                            <li><a href="rastreamento.html" class="text-gray-300 hover:text-white group flex items-center gap-x-3 text-sm leading-6 font-semibold transition-colors sidebar-link"><i class="bi bi-signpost-split text-lg"></i> Rastreamento</a></li>
+                            <li><a href="canais.html" class="text-gray-300 hover:text-white group flex items-center gap-x-3 text-sm leading-6 font-semibold transition-colors sidebar-link"><i class="bi bi-broadcast text-lg"></i> Canais</a></li>
+                            <li><a href="integracoes.html" class="text-gray-300 hover:text-white group flex items-center gap-x-3 text-sm leading-6 font-semibold transition-colors sidebar-link"><i class="bi bi-plug text-lg"></i> Integrações</a></li>
+                        </ul>
+                    </li>
+                    <li class="mt-auto">
+                        <ul role="list" class="space-y-1 pt-6 border-t border-gray-700">
+                            <li><a href="minha-conta.html" class="text-gray-300 hover:text-white group flex items-center gap-x-3 text-sm leading-6 font-semibold transition-colors sidebar-link"><i class="bi bi-person-circle text-lg"></i> Minha Conta</a></li>
+                            <li><button id="logout-button" class="w-full text-left text-gray-300 hover:text-white group flex items-center gap-x-3 text-sm leading-6 font-semibold transition-colors sidebar-link"><i class="bi bi-box-arrow-right text-lg"></i> Sair</button></li>
+                        </ul>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+
+        <div class="pl-72 h-full flex flex-col overflow-hidden w-full">
+            <header class="sticky top-0 z-40 flex h-20 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white/95 px-8 shadow-md backdrop-blur-sm">
+                <button class="hamburger p-2 md:hidden">
+                    <i class="bi bi-list text-2xl text-gray-700"></i>
+                </button>
+                <h2 class="text-2xl font-bold text-gray-900">WhatsApp</h2>
+            </header>
+            <main class="flex-1 overflow-hidden">
+                <div id="whatsapp-custom">
+                    <!-- Loading -->
+                    <div class="chatwoot-loading-full" id="whatsapp-loading">
+                        <i class="fab fa-whatsapp"></i>
+                        <div>Carregando WhatsApp...</div>
+                    </div>
+
+                    <!-- Modal Imagem -->
+                    <div id="modalImagem" class="modal-imagem">
+                        <span class="fechar-imagem" onclick="WhatsApp.closeImage()">×</span>
+                        <img id="imagemAmpliada" src="" alt="Imagem ampliada">
+                    </div>
+
+                    <!-- Modal Nova Conversa -->
+                    <div id="modalNovaConversa" class="modal-nova-conversa">
+                        <div class="modal-nova-content">
+                            <div class="modal-nova-header">
+                                <h3>Nova Conversa</h3>
+                                <span class="close" onclick="WhatsApp.closeNewChat()">×</span>
+                            </div>
+                            <div class="modal-nova-body">
+                                <input type="text" id="novoNumero" placeholder="Número com DDD (ex: 5511999999999)" maxlength="15">
+                                <textarea id="novaMensagem" placeholder="Digite sua mensagem..." style="min-height: 100px; resize: vertical;"></textarea>
+                            </div>
+                            <div class="modal-nova-footer">
+                                <button id="btnEnviarNova" class="btn-enviar-nova" onclick="WhatsApp.sendNewChat()">
+                                    <i class="fa-solid fa-paper-plane"></i> Enviar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Modal Perfil -->
+                    <div id="modalPerfil" class="modal">
+                        <div class="modal-content" style="max-width: 400px;">
+                            <div class="modal-header">
+                                <h3>Perfil do Contato</h3>
+                                <span class="close" onclick="WhatsApp.closeProfile()">×</span>
+                            </div>
+                            <div class="modal-body" style="padding: 20px;">
+                                <div style="text-align: center; margin-bottom: 16px;">
+                                    <div id="perfilAvatar" style="width: 100px; height: 100px; margin: 0 auto 12px; border-radius: 50%; background-color: #ccc; background-size: cover; background-position: center; display: flex; align-items: center; justify-content: center; font-size: 40px; color: white; font-weight: 500;">
+                                        <i class="fa-solid fa-user"></i>
+                                    </div>
+                                </div>
+                                <label style="display: block; margin: 12px 0 6px; font-weight: 500;">Nome</label>
+                                <input type="text" id="editNome" style="width: 100%; padding: 10px; border: 1px solid var(--cor-borda); border-radius: 8px; font-size: 15px;">
+                                <label style="display: block; margin: 12px 0 6px; font-weight: 500;">Número WhatsApp</label>
+                                <input type="text" id="editNumero" placeholder="5511999999999" style="width: 100%; padding: 10px; border: 1px solid var(--cor-borda); border-radius: 8px; font-size: 15px;">
+                                <div style="margin-top: 16px; padding: 12px; background: #f8f9fa; border-radius: 8px; font-size: 13px; color: #666;">
+                                    <strong>Informações</strong><br>
+                                    <span id="perfilInfo">Carregando...</span>
+                                </div>
+                            </div>
+                            <div class="modal-footer" style="display: flex; justify-content: space-between;">
+                                <button onclick="WhatsApp.copyNumber()" style="background: transparent; color: var(--cor-header); border: 1px solid var(--cor-header);">
+                                    <i class="fa-solid fa-copy"></i> Copiar
+                                </button>
+                                <div>
+                                    <button onclick="WhatsApp.saveProfile()" style="background: var(--cor-header); color: white; margin-left: 8px;">
+                                        <i class="fa-solid fa-save"></i> Salvar
+                                    </button>
+                                    <button onclick="WhatsApp.closeProfile()" style="margin-left: 8px; background: #6c757d; color: white;">Fechar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Modal Etiquetas -->
+                    <div id="modalTags" class="modal-tags">
+                        <div class="modal-tags-content">
+                            <div class="modal-tags-header">
+                                <h3>Gerenciar Etiquetas</h3>
+                                <span class="close" onclick="WhatsApp.closeTags()">×</span>
+                            </div>
+                            <div class="modal-tags-body">
+                                <div id="tagsGrid" class="tags-grid">
+                                    <div class="no-tags-message">
+                                        <i class="bi bi-tags"></i>
+                                        <p>Carregando etiquetas...</p>
+                                    </div>
+                                </div>
+                                <div style="text-align: center; margin-top: 16px; padding-top: 16px; border-top: 1px solid #e9edef;">
+                                    <p style="font-size: 13px; color: #667781;">
+                                        <i class="bi bi-info-circle"></i>
+                                        Clique nas etiquetas para adicionar ou remover
+                                    </p>
+                                    <a href="etiquetas.html" style="color: var(--cor-header); font-size: 13px; text-decoration: none; margin-top: 8px; display: inline-block;">
+                                        <i class="bi bi-plus-circle"></i>
+                                        Criar novas etiquetas
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- WhatsApp Interface - ÚNICA ESTRUTURA para Desktop e Mobile -->
+                    <div class="whatsapp-container">
+                        <!-- Painel de Leads (Lista de Conversas) -->
+                        <div class="leads-panel" id="leadsPanelWrapper">
+                            <div class="leads-header">
+                                <button class="nova-conversa-btn" onclick="WhatsApp.openNewChat()" title="Nova Conversa">
+                                    <i class="fa-solid fa-plus"></i>
+                                </button>
+                                <div class="search-container">
+                                    <i class="fa-solid fa-search"></i>
+                                    <input type="text" id="searchInput" placeholder="Buscar contatos...">
+                                </div>
+                            </div>
+                            <div class="leads-list" id="leadsPanel"></div>
+                        </div>
+
+                        <!-- Painel de Chat -->
+                        <div class="chat-panel" id="chatPanelWrapper">
+                            <div class="chat-header">
+                                <!-- Botão Voltar (só aparece no mobile) -->
+                                <button id="backButton" class="back-button">
+                                    <i class="fa-solid fa-arrow-left"></i>
+                                </button>
+                                <div id="chatAvatar" onclick="WhatsApp.openProfile()" title="Ver perfil">
+                                    <i class="fa-solid fa-user"></i>
+                                </div>
+                                <div class="chat-header-info">
+                                    <h3 id="chatNome" onclick="WhatsApp.openProfile()" title="Ver perfil" style="cursor: pointer; margin: 0; font-size: 16px; font-weight: 500;">
+                                        Selecione uma conversa
+                                    </h3>
+                                    <!-- Container de etiquetas do lead -->
+                                    <div id="chatTags" class="lead-tags" style="margin-top: 4px; display: none;">
+                                        <!-- Etiquetas serão inseridas aqui via JS -->
+                                    </div>
+                                </div>
+                                <!-- Botão de Etiquetas -->
+                                <button id="tagsBtn" class="tags-btn" onclick="WhatsApp.openTags()" style="display: none;" title="Gerenciar etiquetas">
+                                    <i class="bi bi-tags-fill"></i>
+                                </button>
+                                <!-- Toggle Bot Ativo -->
+                                <div class="bot-toggle-container" id="botToggleContainer" style="display: none;">
+                                    <span class="bot-toggle-label">Agente IA</span>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="botToggle" disabled>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="chat-messages" id="chatMessages">
+                                <div style="text-align: center; padding: 40px 20px; color: #666;">
+                                    <i class="fab fa-whatsapp" style="font-size: 64px; color: #25d366; margin-bottom: 16px;"></i>
+                                    <p>Selecione uma conversa para começar</p>
+                                </div>
+                            </div>
+                            <div class="chat-input">
+                                <input type="text" id="mensagemInput" placeholder="Digite uma mensagem..." disabled>
+                                <button id="enviarBtn" type="button" disabled>
+                                    <i class="fa-solid fa-paper-plane"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    <script>
+        document.getElementById('logout-button').addEventListener('click', () => {
+             if (typeof logout === 'function') {
+                 logout();
+             } else {
+                 console.error("Função 'logout' não definida. Verifique assets/auth.js.");
+             }
+        });
+
+        // Toggle sidebar on hamburger click
+        const hamburger = document.querySelector('.hamburger');
+        const sidebar = document.querySelector('.sidebar');
+        if (hamburger && sidebar) {
+            hamburger.addEventListener('click', () => {
+                sidebar.classList.toggle('open');
+            });
+
+            // Close sidebar when clicking outside
+            document.addEventListener('click', (event) => {
+                if (!sidebar.contains(event.target) && !hamburger.contains(event.target)) {
+                    sidebar.classList.remove('open');
+                }
+            });
+        }
+    </script>
+    <script src="assets/enviar_mensagem.js"></script>
+</body>
+</html>
