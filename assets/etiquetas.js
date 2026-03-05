@@ -39,6 +39,7 @@ const tagForm = document.getElementById('tag-form');
 const tagIdInput = document.getElementById('tag-id');
 const instrucoesEtiqueta = document.getElementById('instrucoes-etiqueta');
 const tagNameInput = document.getElementById('tag-name');
+const tagInstrucoesInput = document.getElementById('tag-instrucoes');
 const tagColorInput = document.getElementById('tag-color');
 const tagPreview = document.getElementById('tag-preview');
 const colorPicker = document.getElementById('color-picker');
@@ -200,6 +201,7 @@ function openModal(tag = null) {
     modalTitle.textContent = 'Editar Etiqueta';
     tagIdInput.value = tag.id;
     tagNameInput.value = tag.nome;
+    tagInstrucoesInput.value = tag.instrucoes || '';
     tagColorInput.value = tag.cor;
     selectColor(tag.cor);
     btnDeleteTag.classList.remove('hidden');
@@ -208,6 +210,7 @@ function openModal(tag = null) {
     modalTitle.textContent = 'Nova Etiqueta';
     tagIdInput.value = '';
     tagNameInput.value = '';
+    tagInstrucoesInput.value = '';
     tagColorInput.value = '';
     document.querySelectorAll('.color-option').forEach(el => {
       el.classList.remove('selected');
@@ -230,6 +233,7 @@ function closeModal() {
 async function saveTag() {
   const tagId = tagIdInput.value;
   const nome = tagNameInput.value.trim();
+  const instrucoes = tagInstrucoesInput.value.trim();
   const cor = tagColorInput.value;
   
   if (!nome || !cor) {
@@ -241,7 +245,7 @@ async function saveTag() {
   btnSave.innerHTML = '<i class="bi bi-hourglass-split animate-spin mr-2"></i>Salvando...';
   
   try {
-    const data = { nome, cor };
+    const data = { nome, cor, instrucoes };
     
     if (tagId) {
       // Atualizar
